@@ -4,7 +4,7 @@ export function setupSearch() {
   document.querySelector(".search").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    article.querySelectorAll(".highlight").forEach(function (el) {
+    article.querySelectorAll(".highlight").forEach((el) => {
       // nur article highlight löschen
       var parent = el.parentNode;
       parent.replaceChild(document.createTextNode(el.textContent), el);

@@ -1,12 +1,12 @@
 import { fetchBearWikitext, fetchImageUrl } from "./wikipedia.js";
 
-export function setupBears() {
-    function extractBears(wikitext) {
+export async function setupBears() {
+    async function extractBears(wikitext) {
         try {
             var bears = [];
             var rows = wikitext.split("{{Species table/row").slice(1); // erste ist kein bär
             console.log(rows);
-            rows.forEach(function (row) {
+            var bearPromises = rows.map(async (row) => {
                 var nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
                 var binomialMatch = row.match(/\|binomial=(.*?)\n/);
                 var rangeMatch = row.match(/\|range=(.*?)\s+\|range-image=/);
@@ -33,7 +33,7 @@ export function setupBears() {
                 imageElement.style.height = "auto";
                 imageElement.addEventListener(
                     "error",
-                    function () {
+                    () => {
                         imageElement.src = "./media/placeholder.jpg";
                     },
                     { once: true },
@@ -54,36 +54,36 @@ export function setupBears() {
 
                 if (imageMatch) {
                     var fileName = imageMatch[1].trim();
-                    fetchImageUrl(fileName)
-                        .then(function (imageUrl) {
-                            imageElement.src = imageUrl;
-                        })
-                        .catch(function (error) {
-                            console.error("Could not fetch image URL:", error);
-                            imageElement.src = "./media/placeholder.jpg";
-                        });
+
+                    try {
+                        var imageUrl = await fetchImageUrl(fileName);
+                        imageElement.src = imageUrl;
+                    } catch (error) {
+                        console.error("Could not fetch image URL:", error);
+                        imageElement.src = "./media/placeholder.jpg";
+                    }
                 } else {
                     imageElement.src = "./media/placeholder.jpg";
                 }
             });
+            await Promise.all(bearPromises);
         } catch (error) {
             console.error("Could not process bear data:", error);
             throw error;
         }
     }
-    fetchBearWikitext()
-        .then(function (wikitext) {
-            extractBears(wikitext);
-        })
-        .catch(function (error) {
-            console.error(error);
+    try {
+        var wikitext = await fetchBearWikitext();
+        await extractBears(wikitext);
+    } catch (error) {
+        console.error(error);
 
-            var moreBears = document.querySelector(".more_bears");
-            var errorElement = document.createElement("p");
+        var moreBears = document.querySelector(".more_bears");
+        var errorElement = document.createElement("p");
 
-            errorElement.textContent =
-                "Could not load bear information. Please try again later.";
+        errorElement.textContent =
+            "Could not load bear information. Please try again later.";
 
-            moreBears.appendChild(errorElement);
-        });
+        moreBears.appendChild(errorElement);
+    }
 }

@@ -10,7 +10,7 @@ var params = {
     origin: "*",
 };
 
-export function fetchImageUrl(fileName) {
+export async function fetchImageUrl(fileName) {
     // Fetching bear data
     var imageParams = {
         action: "query",
@@ -21,29 +21,22 @@ export function fetchImageUrl(fileName) {
         origin: "*",
     };
     var url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
-    return fetch(url)
-        .then(function (res) {
-            if (!res.ok) {
-                throw new Error("Wikipedia request failed: " + res.status);
-            }
-            return res.json();
-        })
-        .then(function (data) {
-            var pages = data.query.pages;
-            var page = Object.values(pages)[0];
-            return page.imageinfo[0].url;
-        });
+    var response = await fetch(url);
+    if(!response.ok){
+        throw new Error("Wikipedia request failed: " + response.status);
+    }
+    var data = await response.json();
+    var pages = data.query.pages;
+    var page = Object.values(pages)[0];
+    
+    return page.imageinfo[0].url;
 }
 
-export function fetchBearWikitext() {
-    return fetch(baseUrl + "?" + new URLSearchParams(params).toString())
-        .then(function (res) {
-            if (!res.ok) {
-                throw new Error("Wikipedia request failed: " + res.status);
-            }
-            return res.json();
-        })
-        .then(function (data) {
-            return data.parse.wikitext["*"];
-        });
+export async function fetchBearWikitext() {
+    var response = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
+    if(!response.ok){
+        throw new Error("Wikipedia request failed: " + response.status);
+    }
+    var data = await response.json();
+    return data.parse.wikitext["*"];
 }

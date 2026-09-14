@@ -5,7 +5,7 @@ export function setupComments() {
 
   commentWrapper.style.display = "none";
 
-  showHideBtn.addEventListener("click", function () {
+  showHideBtn.addEventListener("click", () => {
     var showHideText = showHideBtn.textContent;
     if (showHideText === "Show comments") {
       showHideBtn.textContent = "Hide comments";
@@ -22,7 +22,7 @@ export function setupComments() {
   var commentField = document.querySelector("#comment");
   var list = document.querySelector(".comment-container");
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     var nameValue = nameField.value.trim();
