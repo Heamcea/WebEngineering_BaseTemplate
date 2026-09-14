@@ -1,9 +1,9 @@
-var baseUrl = "https://en.wikipedia.org/w/api.php";
-var title = "List_of_ursids";
+const baseUrl = "https://en.wikipedia.org/w/api.php";
+const wikiPageTitle = "List_of_ursids";
 
-var params = {
+const bearRequestParams = {
     action: "parse",
-    page: title,
+    page: wikiPageTitle,
     prop: "wikitext",
     section: 3,
     format: "json",
@@ -12,7 +12,7 @@ var params = {
 
 export async function fetchImageUrl(fileName) {
     // Fetching bear data
-    var imageParams = {
+    const imageParams = {
         action: "query",
         titles: "File:" + fileName,
         prop: "imageinfo",
@@ -20,23 +20,26 @@ export async function fetchImageUrl(fileName) {
         format: "json",
         origin: "*",
     };
-    var url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
-    var response = await fetch(url);
-    if(!response.ok){
-        throw new Error("Wikipedia request failed: " + response.status);
-    }
-    var data = await response.json();
-    var pages = data.query.pages;
-    var page = Object.values(pages)[0];
-    
-    return page.imageinfo[0].url;
+    const url = baseUrl + "?" + new URLSearchParams(imageParams).toString();
+    const data = await fetchJson(url);
+    const imagePages = data.query.pages;
+    const imagePage = Object.values(imagePages)[0];
+
+    return imagePage.imageinfo[0].url;
 }
 
 export async function fetchBearWikitext() {
-    var response = await fetch(baseUrl + "?" + new URLSearchParams(params).toString());
-    if(!response.ok){
+    const url = baseUrl + "?" + new URLSearchParams(bearRequestParams).toString();
+    const data = await fetchJson(url);
+    return data.parse.wikitext["*"];
+}
+
+async function fetchJson(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
         throw new Error("Wikipedia request failed: " + response.status);
     }
-    var data = await response.json();
-    return data.parse.wikitext["*"];
+
+    return response.json();
 }

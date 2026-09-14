@@ -76,12 +76,200 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 **Theory question:** Select one of your refactorings and explain how JavaScript scope, closures, references, or prototypes caused the original risk. State how you verified that your refactoring preserved behavior.
 
 > **What bad coding practices did you find? Why is it a bad practice and how did you fix it?**
-> 
-> _Present your findings here..._
->
-> ```js
-> console.log('Make use of markdown codesnippets to show and explain good/bad practices!')
-> ```
+### 1. Unused variables
+
+**Bad practice:**
+
+```js
+const bears = [];
+```
+
+The variable was declared but never used.
+
+**Problem:**  
+Unused variables make the code harder to understand because it is unclear whether they are still needed.
+
+**Good practice:**  
+The unused variable was removed completely.
+
+---
+
+### 2. Using `var` instead of `const`
+
+**Bad practice:**
+
+```js
+var rows = wikitext.split("{{Species table/row").slice(1);
+```
+
+**Problem:**  
+Using `var` can lead to reassignment mistakes and does not provide block-scoped bindings.
+
+**Good practice:**
+
+```js
+const rows = wikitext.split("{{Species table/row").slice(1);
+```
+
+Variables that are not reassigned now use `const`. This reduces accidental reassignment and provides block-scoped bindings.
+
+---
+
+### 3. Repeated DOM queries
+
+**Bad practice:**
+
+```js
+document.querySelector(".more_bears").appendChild(bearElement);
+
+// later again
+document.querySelector(".more_bears").appendChild(errorElement);
+```
+
+**Problem:**  
+The same DOM element does not need to be searched for multiple times.
+
+**Good practice:**
+
+```js
+const moreBears = document.querySelector(".more_bears");
+
+moreBears.appendChild(bearElement);
+moreBears.appendChild(errorElement);
+```
+
+The element is queried once and stored in the surrounding scope so it can be reused.
+
+---
+
+### 4. Too many responsibilities in `extractBears`
+
+**Bad practice:**
+
+```js
+async function extractBears(wikitext) {
+    // parse Wikipedia data
+    // create DOM elements
+    // load images
+    // handle placeholder images
+}
+```
+
+**Problem:**  
+`extractBears` had too many responsibilities, which made the function harder to understand and maintain.
+
+**Good practice:**
+
+```js
+const bear = parseBear(row);
+
+const { bearElement, imageElement } =
+    createBearElement(bear);
+
+await loadBearImage(bear, imageElement);
+```
+
+The responsibilities were separated into different functions:
+
+```js
+function parseBear(row) { ... }
+
+function createBearElement(bear) { ... }
+
+async function loadBearImage(bear, imageElement) { ... }
+```
+
+This makes each function responsible for one specific task and improves maintainability.
+
+---
+
+### 5. Using `innerHTML` for Wikipedia data
+
+**Bad practice:**
+
+```js
+nameElement.innerHTML =
+    "<b>" + bear.name + "</b> (" + bear.binomial + ")";
+```
+
+**Problem:**  
+The bear name and binomial come from Wikipedia. External data should not unnecessarily be inserted with `innerHTML`, because it can introduce unwanted markup and security risks.
+
+**Good practice:**
+
+```js
+const boldName = document.createElement("b");
+boldName.textContent = bear.name;
+
+const scientificName = document.createTextNode(
+    " (" + bear.binomial + ")"
+);
+
+nameElement.appendChild(boldName);
+nameElement.appendChild(scientificName);
+```
+
+The DOM elements are now created explicitly and the external values are inserted as text.
+
+---
+
+### 6. Generic variable names
+
+**Bad practice:**
+
+```js
+const title = "List_of_ursids";
+const params = { ... };
+const page = Object.values(pages)[0];
+```
+
+**Problem:**  
+Generic variable names are harder to understand without reading the surrounding code.
+
+**Good practice:**
+
+```js
+const wikiPageTitle = "List_of_ursids";
+const bearRequestParams = { ... };
+
+const imagePages = data.query.pages;
+const imagePage = Object.values(imagePages)[0];
+```
+
+The variables were renamed so their purpose is clearer.
+
+---
+
+### 7. Repeated placeholder image path
+
+**Bad practice:**
+
+```js
+imageElement.src = "./media/placeholder.jpg";
+
+// later
+imageElement.src = "./media/placeholder.jpg";
+
+// later
+imageElement.src = "./media/placeholder.jpg";
+```
+
+**Problem:**  
+The placeholder image path was repeated in multiple places. This can cause maintenance problems because every occurrence has to be changed separately.
+
+**Good practice:**
+
+```js
+const PLACEHOLDER_IMAGE = "./media/placeholder.jpg";
+```
+
+The constant is reused wherever the placeholder image is required:
+
+```js
+imageElement.src = PLACEHOLDER_IMAGE;
+```
+
+The path is now defined in one place and can be changed easily.
 
 
 ## 2. Dependency- and Build Management Playground

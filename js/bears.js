@@ -1,70 +1,16 @@
 import { fetchBearWikitext, fetchImageUrl } from "./wikipedia.js";
+const PLACEHOLDER_IMAGE = "./media/placeholder.jpg";
 
 export async function setupBears() {
+    const moreBears = document.querySelector(".more_bears");
     async function extractBears(wikitext) {
         try {
-            var bears = [];
-            var rows = wikitext.split("{{Species table/row").slice(1); // erste ist kein bär
-            console.log(rows);
-            var bearPromises = rows.map(async (row) => {
-                var nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
-                var binomialMatch = row.match(/\|binomial=(.*?)\n/);
-                var rangeMatch = row.match(/\|range=(.*?)\s+\|range-image=/);
-                var imageMatch = row.match(
-                    /\|image=File:(.*?)\s+\|image-size=/,
-                );
-
-                if (!nameMatch || !binomialMatch || !rangeMatch) {
-                    throw new Error("Could not parse required bear data.");
-                }
-                var bear = {
-                    name: nameMatch[1],
-                    binomial: binomialMatch[1],
-                    range: rangeMatch[1],
-                };
-
-                var moreBears = document.querySelector(".more_bears");
-                var bearElement = document.createElement("div");
-                bearElement.className = "bear";
-
-                var imageElement = document.createElement("img");
-                imageElement.alt = "Image of " + bear.name;
-                imageElement.style.width = "200px";
-                imageElement.style.height = "auto";
-                imageElement.addEventListener(
-                    "error",
-                    () => {
-                        imageElement.src = "./media/placeholder.jpg";
-                    },
-                    { once: true },
-                );
-
-                var nameElement = document.createElement("p");
-                nameElement.innerHTML =
-                    "<b>" + bear.name + "</b> (" + bear.binomial + ")";
-
-                var rangeElement = document.createElement("p");
-                rangeElement.textContent = "Range: " + bear.range;
-
-                bearElement.appendChild(imageElement);
-                bearElement.appendChild(nameElement);
-                bearElement.appendChild(rangeElement);
-
+            const rows = wikitext.split("{{Species table/row").slice(1); // erste ist kein bär
+            const bearPromises = rows.map(async (row) => {
+                const bear = parseBear(row);
+                const { bearElement, imageElement } = createBearElement(bear);
                 moreBears.appendChild(bearElement);
-
-                if (imageMatch) {
-                    var fileName = imageMatch[1].trim();
-
-                    try {
-                        var imageUrl = await fetchImageUrl(fileName);
-                        imageElement.src = imageUrl;
-                    } catch (error) {
-                        console.error("Could not fetch image URL:", error);
-                        imageElement.src = "./media/placeholder.jpg";
-                    }
-                } else {
-                    imageElement.src = "./media/placeholder.jpg";
-                }
+                await loadBearImage(bear, imageElement);
             });
             await Promise.all(bearPromises);
         } catch (error) {
@@ -73,17 +19,86 @@ export async function setupBears() {
         }
     }
     try {
-        var wikitext = await fetchBearWikitext();
+        const wikitext = await fetchBearWikitext();
         await extractBears(wikitext);
     } catch (error) {
         console.error(error);
-
-        var moreBears = document.querySelector(".more_bears");
-        var errorElement = document.createElement("p");
+        const errorElement = document.createElement("p");
 
         errorElement.textContent =
             "Could not load bear information. Please try again later.";
 
         moreBears.appendChild(errorElement);
+    }
+}
+    function parseBear(row) {
+        const nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
+        const binomialMatch = row.match(/\|binomial=(.*?)\n/);
+        const rangeMatch = row.match(/\|range=(.*?)\s+\|range-image=/);
+        const imageMatch = row.match(/\|image=File:(.*?)\s+\|image-size=/);
+
+        if (!nameMatch || !binomialMatch || !rangeMatch) {
+            throw new Error("Could not parse required bear data.");
+        }
+
+        return {
+            name: nameMatch[1],
+            binomial: binomialMatch[1],
+            range: rangeMatch[1],
+            fileName: imageMatch ? imageMatch[1].trim() : null,
+        };
+    }
+    function createBearElement(bear) {
+        const bearElement = document.createElement("div");
+        bearElement.className = "bear";
+
+        const imageElement = document.createElement("img");
+        imageElement.alt = "Image of " + bear.name;
+        imageElement.style.width = "200px";
+        imageElement.style.height = "auto";
+
+        imageElement.addEventListener(
+            "error",
+            () => {
+                imageElement.src = PLACEHOLDER_IMAGE;
+            },
+            { once: true },
+        );
+
+        const nameElement = document.createElement("p");
+
+        const boldName = document.createElement("b");
+        boldName.textContent = bear.name;
+
+        const scientificName = document.createTextNode(
+            " (" + bear.binomial + ")",
+        );
+
+        nameElement.appendChild(boldName);
+        nameElement.appendChild(scientificName);
+
+        const rangeElement = document.createElement("p");
+        rangeElement.textContent = "Range: " + bear.range;
+
+        bearElement.appendChild(imageElement);
+        bearElement.appendChild(nameElement);
+        bearElement.appendChild(rangeElement);
+
+        return {
+            bearElement,
+            imageElement,
+        };
+    }
+    async function loadBearImage(bear, imageElement) {
+    if (!bear.fileName) {
+        imageElement.src = PLACEHOLDER_IMAGE;
+        return;
+    }
+    try {
+        const imageUrl = await fetchImageUrl(bear.fileName);
+        imageElement.src = imageUrl;
+    } catch (error) {
+        console.error("Could not fetch image URL:", error);
+        imageElement.src = PLACEHOLDER_IMAGE;
     }
 }
