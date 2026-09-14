@@ -5,16 +5,16 @@ export function setupComments() {
 
       commentWrapper.style.display = 'none';
 
-      showHideBtn.onclick = function() {
+      showHideBtn.addEventListener('click', function() {
         var showHideText = showHideBtn.textContent;
-        if (showHideText === 'Show comment') { 
+        if (showHideText === 'Show comments') { 
           showHideBtn.textContent = 'Hide comments';
           commentWrapper.style.display = 'block';
         } else {
           showHideBtn.textContent = 'Show comments';
           commentWrapper.style.display = 'none';
         }
-      };
+      });
 
       // Comment form stuff
       var form = document.querySelector('.comment-form');
@@ -22,19 +22,23 @@ export function setupComments() {
       var commentField = document.querySelector('#comment');
       var list = document.querySelector('.comment-container');
 
-      form.onsubmit = function(e) {
+      form.addEventListener('submit', function(e) {
         e.preventDefault();
+       
+        var nameValue = nameField.value.trim();
+        var commentValue = commentField.value.trim();
+
+        if(!nameValue || !commentValue)
+        {
+          return;
+        }
 
         var listItem = document.createElement('li');
         var namePara = document.createElement('p');
         var commentPara = document.createElement('p');
-        var nameValue = nameField.valeu;
-        var commentValue = commentField.value;
 
-        namePara.textContnet = nameValue;
+        namePara.textContent = nameValue;
         commentPara.textContent = commentValue;
-
-        console.log(nameValue);
 
         list.appendChild(listItem);
         listItem.appendChild(namePara);
@@ -42,5 +46,5 @@ export function setupComments() {
 
         nameField.value = '';
         commentField.value = '';
-      };
+      });
     }

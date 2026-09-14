@@ -1,9 +1,10 @@
 export function setupSearch() {
+    var article = document.querySelector('article');
   // Search highlighter
     document.querySelector('.search').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        document.querySelectorAll('.highlight').forEach(function(el) {
+        article.querySelectorAll('.highlight').forEach(function(el) { // nur article highlight löschen
           var parent = el.parentNode;
           parent.replaceChild(document.createTextNode(el.textContent), el);
           parent.normalize();
@@ -28,6 +29,6 @@ export function setupSearch() {
           }
         }
 
-        walk(document.body);
+        walk(article); // nur article nicht body suchen!
       });
 }
