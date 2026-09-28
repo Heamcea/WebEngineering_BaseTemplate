@@ -1,17 +1,27 @@
-export function setupSearch() {
-  const article = document.querySelector("article");
+export function setupSearch(): void {
+  const article = document.querySelector<HTMLElement>('article');
+
+  const searchForm =document.querySelector<HTMLFormElement>('.search');
+
+  const searchInput = searchForm?.querySelector<HTMLInputElement>('input[name="q"]');
+
+  if (!article || !searchForm || !searchInput) {
+    throw new Error('Required search elements not found');
+  }
   // Search highlighter
-  document.querySelector(".search").addEventListener("submit", function (e) {
+  searchForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     article.querySelectorAll(".highlight").forEach((el) => {
       // nur article highlight löschen
       const parent = el.parentNode;
-      parent.replaceChild(document.createTextNode(el.textContent), el);
-      parent.normalize();
+      if (parent) {
+        parent.replaceChild(document.createTextNode(el.textContent ?? ''), el);
+        parent.normalize();
+      }
     });
 
-    const searchKey = this.q.value.trim();
+    const searchKey = searchInput.value.trim();
     if (!searchKey) return;
 
     const regex = new RegExp(
@@ -19,9 +29,9 @@ export function setupSearch() {
       "gi",
     );
 
-    function walk(node) {
-      if (node.nodeType === 3) {
-        const parts = node.nodeValue.split(regex);
+function walk(node: Node): void {
+      if (node instanceof Text) {
+        const parts = node.data.split(regex);
 
         if (parts.length > 1) {
           const fragment = document.createDocumentFragment();
@@ -41,12 +51,12 @@ export function setupSearch() {
           node.replaceWith(fragment);
         }
       } else if (
-        node.nodeType === 1 &&
+        node instanceof Element &&
         node.tagName !== "SCRIPT" &&
         node.tagName !== "STYLE" &&
         node.tagName !== "FORM"
       ) {
-        node.childNodes.forEach(walk);
+        Array.from(node.childNodes).forEach(walk);
       }
     }
 

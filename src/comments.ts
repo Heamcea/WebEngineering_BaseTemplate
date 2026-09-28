@@ -1,7 +1,11 @@
-export function setupComments() {
+export function setupComments(): void {
   // Show/hide comments toggle
-  const showHideBtn = document.querySelector(".show-hide");
-  const commentWrapper = document.querySelector(".comment-wrapper");
+  const showHideBtn = document.querySelector<HTMLButtonElement>('.show-hide');
+  const commentWrapper = document.querySelector<HTMLDivElement>('.comment-wrapper');
+  
+  if (!showHideBtn || !commentWrapper) {
+    throw new Error('Comment elements not found');
+  }
 
   commentWrapper.style.display = "none";
 
@@ -17,11 +21,13 @@ export function setupComments() {
   });
 
   // Comment form stuff
-  const form = document.querySelector(".comment-form");
-  const nameField = document.querySelector("#name");
-  const commentField = document.querySelector("#comment");
-  const list = document.querySelector(".comment-container");
-
+  const form = document.querySelector<HTMLFormElement>('.comment-form');
+  const nameField = document.querySelector<HTMLInputElement>('#name');
+  const commentField = document.querySelector<HTMLInputElement>('#comment');
+  const list = document.querySelector<HTMLUListElement>('.comment-container');
+  if (!form || !nameField || !commentField || !list) {
+    throw new Error('Comment form elements not found');
+  }
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 

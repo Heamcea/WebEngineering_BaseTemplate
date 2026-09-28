@@ -1,15 +1,21 @@
-import { fetchBearWikitext, fetchImageUrl } from "./wikipedia.js";
-const PLACEHOLDER_IMAGE = "./media/placeholder.jpg";
+import { fetchBearWikitext, fetchImageUrl } from "./wikipedia";
+import type { Bear } from './types';
 
-export async function setupBears() {
-    const moreBears = document.querySelector(".more_bears");
-    async function extractBears(wikitext) {
+const PLACEHOLDER_IMAGE = "/media/placeholder.jpg";
+
+export async function setupBears(): Promise<void> {
+    const moreBears = document.querySelector<HTMLElement>('.more_bears');
+    if (!moreBears) {
+    throw new Error('More Bears element not found');
+    }
+    const bearContainer: HTMLElement = moreBears;
+    async function extractBears(wikitext: string): Promise<void> {
         try {
             const rows = wikitext.split("{{Species table/row").slice(1); // erste ist kein bär
             const bearPromises = rows.map(async (row) => {
                 const bear = parseBear(row);
                 const { bearElement, imageElement } = createBearElement(bear);
-                moreBears.appendChild(bearElement);
+                bearContainer.appendChild(bearElement);
                 await loadBearImage(bear, imageElement);
             });
             await Promise.all(bearPromises);
@@ -31,7 +37,7 @@ export async function setupBears() {
         moreBears.appendChild(errorElement);
     }
 }
-    function parseBear(row) {
+    function parseBear(row: string): Bear {
         const nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
         const binomialMatch = row.match(/\|binomial=(.*?)\n/);
         const rangeMatch = row.match(/\|range=(.*?)\s+\|range-image=/);
@@ -45,10 +51,13 @@ export async function setupBears() {
             name: nameMatch[1],
             binomial: binomialMatch[1],
             range: rangeMatch[1],
-            fileName: imageMatch ? imageMatch[1].trim() : null,
+            fileName: imageMatch?.[1]?.trim() || null,
         };
     }
-    function createBearElement(bear) {
+    function createBearElement(bear: Bear): {
+        bearElement: HTMLDivElement;
+        imageElement: HTMLImageElement;
+    } {
         const bearElement = document.createElement("div");
         bearElement.className = "bear";
 
@@ -89,7 +98,7 @@ export async function setupBears() {
             imageElement,
         };
     }
-    async function loadBearImage(bear, imageElement) {
+    async function loadBearImage(bear: Bear, imageElement: HTMLImageElement): Promise<void> {
     if (!bear.fileName) {
         imageElement.src = PLACEHOLDER_IMAGE;
         return;
