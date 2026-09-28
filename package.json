@@ -13,6 +13,8 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-promise": "^6.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.9.9",
     "typescript": "5.3.3",
     "vite": "^8.3.1"
@@ -26,7 +28,14 @@
     "lint:fix": "eslint src --ext \".js,.ts\" --fix",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts}\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "keywords": [],
   "author": "",
