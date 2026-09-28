@@ -1,22 +1,23 @@
 export function setupComments(): void {
   // Show/hide comments toggle
   const showHideBtn = document.querySelector<HTMLButtonElement>('.show-hide');
-  const commentWrapper = document.querySelector<HTMLDivElement>('.comment-wrapper');
-  
-  if (!showHideBtn || !commentWrapper) {
+  const commentWrapper =
+    document.querySelector<HTMLDivElement>('.comment-wrapper');
+
+  if (showHideBtn === null || commentWrapper === null) {
     throw new Error('Comment elements not found');
   }
 
-  commentWrapper.style.display = "none";
+  commentWrapper.style.display = 'none';
 
-  showHideBtn.addEventListener("click", () => {
+  showHideBtn.addEventListener('click', () => {
     const showHideText = showHideBtn.textContent;
-    if (showHideText === "Show comments") {
-      showHideBtn.textContent = "Hide comments";
-      commentWrapper.style.display = "block";
+    if (showHideText === 'Show comments') {
+      showHideBtn.textContent = 'Hide comments';
+      commentWrapper.style.display = 'block';
     } else {
-      showHideBtn.textContent = "Show comments";
-      commentWrapper.style.display = "none";
+      showHideBtn.textContent = 'Show comments';
+      commentWrapper.style.display = 'none';
     }
   });
 
@@ -25,22 +26,27 @@ export function setupComments(): void {
   const nameField = document.querySelector<HTMLInputElement>('#name');
   const commentField = document.querySelector<HTMLInputElement>('#comment');
   const list = document.querySelector<HTMLUListElement>('.comment-container');
-  if (!form || !nameField || !commentField || !list) {
+  if (
+    form === null ||
+    nameField === null ||
+    commentField === null ||
+    list === null
+  ) {
     throw new Error('Comment form elements not found');
   }
-  form.addEventListener("submit", (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const nameValue = nameField.value.trim();
     const commentValue = commentField.value.trim();
 
-    if (!nameValue || !commentValue) {
+    if (nameValue === '' || commentValue === '') {
       return;
     }
 
-    const listItem = document.createElement("li");
-    const namePara = document.createElement("p");
-    const commentPara = document.createElement("p");
+    const listItem = document.createElement('li');
+    const namePara = document.createElement('p');
+    const commentPara = document.createElement('p');
 
     namePara.textContent = nameValue;
     commentPara.textContent = commentValue;
@@ -49,7 +55,7 @@ export function setupComments(): void {
     listItem.appendChild(namePara);
     listItem.appendChild(commentPara);
 
-    nameField.value = "";
-    commentField.value = "";
+    nameField.value = '';
+    commentField.value = '';
   });
 }
