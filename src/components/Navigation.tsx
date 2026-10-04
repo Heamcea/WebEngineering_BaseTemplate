@@ -1,13 +1,19 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 
 interface NavigationProps {
+  searchTerm: string;
   onSearch: (query: string) => void;
 }
 
-export function Navigation({ onSearch }: NavigationProps): ReactElement {
+export function Navigation({
+  searchTerm,
+  onSearch,
+}: NavigationProps): ReactElement {
   const [searchInput, setSearchInput] = useState('');
+  useEffect(() => {
+    setSearchInput(searchTerm);
+  }, [searchTerm]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();

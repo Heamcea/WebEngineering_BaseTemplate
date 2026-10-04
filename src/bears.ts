@@ -47,10 +47,15 @@ function parseBear(row: string): Bear {
   if (nameMatch === null || binomialMatch === null || rangeMatch === null) {
     throw new Error('Could not parse required bear data.');
   }
-
+  const binomial = binomialMatch[1].trim();
+  const id = binomial
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
   return {
+    id,
     name: nameMatch[1],
-    binomial: binomialMatch[1],
+    binomial,
     range: rangeMatch[1],
     fileName: imageMatch?.[1]?.trim() ?? null,
     imageUrl: null,

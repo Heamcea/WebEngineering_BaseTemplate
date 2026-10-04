@@ -2,19 +2,33 @@ import { useEffect, useState } from 'react';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
-import { Sidebar } from './components/Sidebar';
-import { Article } from './features/article/Article';
+import { BearDetailPage } from './pages/BearDetailPage';
+import { HomePage } from './pages/HomePage';
 import { fetchBears } from './bears';
 import type { ReactElement } from 'react';
 import type { BearState } from './types';
 
+import { Route, Routes, useSearchParams } from 'react-router';
+
 export function App(): ReactElement {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchTerm = searchParams.get('q') ?? '';
 
   const [bearState, setBearState] = useState<BearState>({
     status: 'loading',
   });
+  function handleSearch(query: string): void {
+    const newSearchParams = new URLSearchParams(searchParams);
 
+    if (query === '') {
+      newSearchParams.delete('q');
+    } else {
+      newSearchParams.set('q', query);
+    }
+
+    setSearchParams(newSearchParams);
+  }
   useEffect(() => {
     const controller = new AbortController();
 
@@ -62,13 +76,21 @@ export function App(): ReactElement {
     <>
       <Header />
 
-      <Navigation onSearch={setSearchTerm} />
+      <Navigation searchTerm={searchTerm} onSearch={handleSearch} />
 
-      <main>
-        <Article bearState={bearState} searchTerm={searchTerm} />
+      <Routes>
+        <Route
+          path="/"
+          element={<HomePage bearState={bearState} searchTerm={searchTerm} />}
+        />
 
-        <Sidebar />
-      </main>
+        <Route
+          path="/bears/:bearId"
+          element={
+            <BearDetailPage bearState={bearState} searchTerm={searchTerm} />
+          }
+        />
+      </Routes>
 
       <Footer />
     </>

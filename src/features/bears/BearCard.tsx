@@ -1,4 +1,5 @@
 import { HighlightText } from '../search/HighlightText';
+import { Link } from 'react-router';
 
 import type { Bear } from '../../types';
 import type { ReactElement } from 'react';
@@ -23,8 +24,10 @@ export function BearCard({ bear, searchTerm }: BearCardProps): ReactElement {
       />
       <p>
         <strong>
-          <HighlightText text={bear.name} query={searchTerm} />
-        </strong>{' '}
+          <Link to={`/bears/${bear.id}`}>
+            <HighlightText text={bear.name} query={searchTerm} />
+          </Link>
+        </strong>
         (
         <HighlightText text={bear.binomial} query={searchTerm} />)
       </p>
