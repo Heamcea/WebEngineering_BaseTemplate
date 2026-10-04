@@ -10,7 +10,10 @@ const bearRequestParams = {
   origin: '*',
 };
 
-export async function fetchImageUrl(fileName: string): Promise<string> {
+export async function fetchImageUrl(
+  fileName: string,
+  signal: AbortSignal
+): Promise<string> {
   // Fetching bear data
   const imageParams = {
     action: 'query',
@@ -21,7 +24,7 @@ export async function fetchImageUrl(fileName: string): Promise<string> {
     origin: '*',
   };
   const url = baseUrl + '?' + new URLSearchParams(imageParams).toString();
-  const data = await fetchJson(url);
+  const data = await fetchJson(url, signal);
   if (!isRecord(data) || !isRecord(data.query) || !isRecord(data.query.pages)) {
     throw new Error('Invalid Wikipedia image response');
   }
@@ -37,9 +40,9 @@ export async function fetchImageUrl(fileName: string): Promise<string> {
   return imageInfo.url;
 }
 
-export async function fetchBearWikitext(): Promise<string> {
+export async function fetchBearWikitext(signal: AbortSignal): Promise<string> {
   const url = baseUrl + '?' + new URLSearchParams(bearRequestParams).toString();
-  const data = await fetchJson(url);
+  const data = await fetchJson(url, signal);
   if (
     !isRecord(data) ||
     !isRecord(data.parse) ||
@@ -51,8 +54,8 @@ export async function fetchBearWikitext(): Promise<string> {
   return data.parse.wikitext['*'];
 }
 
-async function fetchJson(url: string): Promise<unknown> {
-  const response = await fetch(url);
+async function fetchJson(url: string, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch(url, { signal });
 
   if (!response.ok) {
     throw new Error('Wikipedia request failed: ' + response.status);

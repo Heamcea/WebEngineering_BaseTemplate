@@ -2,15 +2,30 @@ import { BearList } from '../bears/BearList';
 import { Comments } from '../comments/Comments';
 import { HighlightText } from '../search/HighlightText';
 
-import type { Bear } from '../../types';
+import type { BearState } from '../../types';
 import type { ReactElement } from 'react';
 
 interface ArticleProps {
-  bears: readonly Bear[];
+  bearState: BearState;
   searchTerm: string;
 }
 
-export function Article({ bears, searchTerm }: ArticleProps): ReactElement {
+export function Article({ bearState, searchTerm }: ArticleProps): ReactElement {
+  function renderBears(): ReactElement {
+    switch (bearState.status) {
+      case 'loading':
+        return <p>Loading bears...</p>;
+
+      case 'error':
+        return <p>{bearState.message}</p>;
+
+      case 'empty':
+        return <p>No bears found.</p>;
+
+      case 'success':
+        return <BearList bears={bearState.bears} searchTerm={searchTerm} />;
+    }
+  }
   return (
     <article>
       <h1>
@@ -163,7 +178,7 @@ export function Article({ bears, searchTerm }: ArticleProps): ReactElement {
 
       <Comments searchTerm={searchTerm} />
 
-      <BearList bears={bears} searchTerm={searchTerm} />
+      {renderBears()}
     </article>
   );
 }
