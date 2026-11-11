@@ -1,6 +1,7 @@
 import type { FastifyPluginAsyncZod } from '@fastify/type-provider-zod';
 import { z } from 'zod';
 
+import { NotFoundError } from '../errors.js';
 import { BearId } from '../schemas/bear.js';
 import { Comment, NewComment } from '../schemas/comment.js';
 import { getBearById } from '../services/bear-service.js';
@@ -9,10 +10,6 @@ import {
   deleteComment,
   getCommentsForBear,
 } from '../services/comment-service.js';
-
-const ErrorResponse = z.object({
-  error: z.string(),
-});
 
 export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -24,7 +21,6 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         }),
         response: {
           200: z.array(Comment),
-          404: ErrorResponse,
         },
       },
     },
@@ -32,9 +28,7 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       const bear = await getBearById(request.params.id);
 
       if (bear === undefined) {
-        return await reply.code(404).send({
-          error: 'Bear not found',
-        });
+        throw new NotFoundError('Bear not found');
       }
 
       return getCommentsForBear(request.params.id);
@@ -51,7 +45,6 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         body: NewComment,
         response: {
           201: Comment,
-          404: ErrorResponse,
         },
       },
     },
@@ -59,9 +52,7 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       const bear = await getBearById(request.params.id);
 
       if (bear === undefined) {
-        return await reply.code(404).send({
-          error: 'Bear not found',
-        });
+        throw new NotFoundError('Bear not found');
       }
 
       const comment = createComment(request.params.id, request.body);
@@ -82,7 +73,6 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         }),
         response: {
           204: z.null(),
-          404: ErrorResponse,
         },
       },
     },
@@ -90,9 +80,7 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       const deleted = deleteComment(request.params.commentId);
 
       if (!deleted) {
-        return await reply.code(404).send({
-          error: 'Comment not found',
-        });
+        throw new NotFoundError('Comment not found');
       }
 
       return await reply.code(204).send(null);

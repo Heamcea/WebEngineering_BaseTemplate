@@ -4,6 +4,8 @@ import { HighlightText } from '../search/HighlightText';
 
 import type { FormEvent, ReactElement } from 'react';
 
+import { getProblemDetail } from '../../problem';
+
 interface Comment {
   id: string;
   bearId: string;
@@ -41,14 +43,16 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
         });
 
         if (!response.ok) {
-          throw new Error(`Could not load comments: ${response.status}`);
+          throw new Error(await getProblemDetail(response));
         }
 
         const data = (await response.json()) as Comment[];
         setComments(data);
       } catch (error: unknown) {
         if (!controller.signal.aborted) {
-          setError('Could not load comments. Please try again later.');
+          setError(
+            error instanceof Error ? error.message : 'Could not load comments.'
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -92,7 +96,7 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
       });
 
       if (!response.ok) {
-        throw new Error(`Could not create comment: ${response.status}`);
+        throw new Error(await getProblemDetail(response));
       }
 
       const newComment = (await response.json()) as Comment;
@@ -101,8 +105,10 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
 
       setName('');
       setComment('');
-    } catch {
-      setError('Could not create comment. Please try again.');
+    } catch (error: unknown) {
+      setError(
+        error instanceof Error ? error.message : 'Could not create comment.'
+      );
     }
   }
 
@@ -115,14 +121,16 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
       });
 
       if (!response.ok) {
-        throw new Error(`Could not delete comment: ${response.status}`);
+        throw new Error(await getProblemDetail(response));
       }
 
       setComments((currentComments) =>
         currentComments.filter((item) => item.id !== commentId)
       );
-    } catch {
-      setError('Could not delete comment. Please try again.');
+    } catch (error: unknown) {
+      setError(
+        error instanceof Error ? error.message : 'Could not delete comment.'
+      );
     }
   }
 

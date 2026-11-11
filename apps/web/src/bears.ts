@@ -1,4 +1,5 @@
 import type { Bear } from './types';
+import { getProblemDetail } from './problem';
 
 export async function fetchBears(signal?: AbortSignal): Promise<Bear[]> {
   const response = await fetch('/api/bears', {
@@ -6,7 +7,7 @@ export async function fetchBears(signal?: AbortSignal): Promise<Bear[]> {
   });
 
   if (!response.ok) {
-    throw new Error(`Could not load bears: ${response.status}`);
+    throw new Error(await getProblemDetail(response));
   }
 
   return (await response.json()) as Bear[];

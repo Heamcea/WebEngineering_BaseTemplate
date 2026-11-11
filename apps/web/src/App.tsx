@@ -60,7 +60,10 @@ export function App(): ReactElement {
 
         setBearState({
           status: 'error',
-          message: 'Could not load bear information. Please try again later.',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Could not load bear information.',
         });
       }
     }
