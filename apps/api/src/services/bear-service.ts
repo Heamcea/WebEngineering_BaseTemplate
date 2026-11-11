@@ -25,13 +25,19 @@ export async function getBears(): Promise<Bear[]> {
         }
       }
 
-      return BearSchema.parse({
+      const result = BearSchema.safeParse({
         id: bear.id,
         name: bear.name,
         binomial: bear.binomial,
         range: bear.range,
         imageUrl,
       });
+
+      if (!result.success) {
+        throw new UpstreamError('Wikipedia returned invalid bear data');
+      }
+
+      return result.data;
     })
   );
 
