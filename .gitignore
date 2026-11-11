@@ -12,6 +12,8 @@ dist
 dist-ssr
 build
 *.local
+*/dist
+*/mode_modules
 
 # Editor directories and files
 .vscode/*
