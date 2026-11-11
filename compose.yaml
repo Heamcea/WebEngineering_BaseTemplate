@@ -4,6 +4,7 @@ services:
       context: ./apps/api
     environment:
       PORT: "3000"
+      CORS_ORIGINS: "http://localhost:4173"
     ports:
       - "3000:3000"
 

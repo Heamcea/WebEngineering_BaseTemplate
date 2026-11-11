@@ -10,6 +10,7 @@ import {
   deleteComment,
   getCommentsForBear,
 } from '../services/comment-service.js';
+import { Problem } from '../schemas/problem.js';
 
 export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -21,6 +22,11 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         }),
         response: {
           200: z.array(Comment),
+          400: Problem,
+          404: Problem,
+          502: Problem,
+          504: Problem,
+          500: Problem,
         },
       },
     },
@@ -45,6 +51,12 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         body: NewComment,
         response: {
           201: Comment,
+          400: Problem,
+          404: Problem,
+          415: Problem,
+          502: Problem,
+          504: Problem,
+          500: Problem,
         },
       },
     },
@@ -73,6 +85,9 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         }),
         response: {
           204: z.null(),
+          400: Problem,
+          404: Problem,
+          500: Problem,
         },
       },
     },

@@ -2,10 +2,13 @@ import { randomUUID } from 'node:crypto';
 import { bearRoutes } from './routes/bears.js';
 import { commentRoutes } from './routes/comments.js';
 import {
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from '@fastify/type-provider-zod';
-
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
+import cors from '@fastify/cors';
 import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
 import { AppError } from './errors.js';
 
@@ -17,11 +20,38 @@ export function buildApp(): FastifyInstance {
   });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  const corsOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin !== '');
+
+  void app.register(cors, {
+    origin: corsOrigins,
+    methods: ['GET', 'POST', 'DELETE'],
+    allowedHeaders: ['content-type', 'x-request-id'],
+    exposedHeaders: ['location', 'x-request-id'],
+    credentials: false,
+    maxAge: 600,
+  });
   app.get('/health', async () => ({
     status: 'ok',
     version: process.env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
+  void app.register(swagger, {
+    openapi: {
+      openapi: '3.1.0',
+      info: {
+        title: 'Bear API',
+        version: '0.1.0',
+      },
+    },
+    transform: jsonSchemaTransform,
+  });
+
+  void app.register(swaggerUi, {
+    routePrefix: '/api/docs',
+  });
 
   app.addHook('onSend', async (request, reply) => {
     void reply.header('x-request-id', request.id);
