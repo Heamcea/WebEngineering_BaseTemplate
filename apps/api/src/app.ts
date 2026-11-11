@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { bearRoutes } from './routes/bears.js';
 import { commentRoutes } from './routes/comments.js';
+import { healthRoutes } from './routes/health.js';
 import {
   jsonSchemaTransform,
   serializerCompiler,
@@ -33,11 +34,6 @@ export function buildApp(): FastifyInstance {
     credentials: false,
     maxAge: 600,
   });
-  app.get('/health', async () => ({
-    status: 'ok',
-    version: process.env.APP_VERSION ?? 'dev',
-    uptime: Math.round(process.uptime()),
-  }));
   void app.register(swagger, {
     openapi: {
       openapi: '3.1.0',
@@ -52,12 +48,14 @@ export function buildApp(): FastifyInstance {
   void app.register(swaggerUi, {
     routePrefix: '/api/docs',
   });
-
   app.addHook('onSend', async (request, reply) => {
     void reply.header('x-request-id', request.id);
   });
+
+  void app.register(healthRoutes);
   void app.register(bearRoutes);
   void app.register(commentRoutes);
+
   app.setErrorHandler<FastifyError>(async (error, request, reply) => {
     if (error.validation !== undefined) {
       const errors = error.validation.map((validationError) => {
