@@ -22,12 +22,12 @@ export function buildApp(): FastifyInstance {
     version: process.env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
-  void app.register(bearRoutes);
-  void app.register(commentRoutes);
+
   app.addHook('onSend', async (request, reply) => {
     void reply.header('x-request-id', request.id);
   });
-
+  void app.register(bearRoutes);
+  void app.register(commentRoutes);
   app.setErrorHandler<FastifyError>(async (error, request, reply) => {
     if (error.validation !== undefined) {
       const errors = error.validation.map((validationError) => {
@@ -53,6 +53,26 @@ export function buildApp(): FastifyInstance {
           detail: 'The request contains invalid data.',
           instance: `urn:uuid:${request.id}`,
           errors,
+        });
+    }
+    if (error.statusCode === 400 || error.statusCode === 415) {
+      request.log.info({ err: error }, 'request rejected');
+
+      return await reply
+        .code(error.statusCode)
+        .type('application/problem+json')
+        .send({
+          type: 'https://bears.example/problems/request',
+          title:
+            error.statusCode === 400
+              ? 'Invalid request'
+              : 'Unsupported media type',
+          status: error.statusCode,
+          detail:
+            error.statusCode === 400
+              ? 'The request could not be parsed.'
+              : 'The request uses an unsupported content type.',
+          instance: `urn:uuid:${request.id}`,
         });
     }
 
@@ -88,6 +108,18 @@ export function buildApp(): FastifyInstance {
         title: 'Internal server error',
         status: 500,
         detail: 'An unexpected error occurred.',
+        instance: `urn:uuid:${request.id}`,
+      });
+  });
+  app.setNotFoundHandler(async (request, reply) => {
+    return await reply
+      .code(404)
+      .type('application/problem+json')
+      .send({
+        type: 'https://bears.example/problems/not-found',
+        title: 'Resource not found',
+        status: 404,
+        detail: 'No such route.',
         instance: `urn:uuid:${request.id}`,
       });
   });

@@ -1,5 +1,6 @@
 import { BearSchema, type Bear } from '../schemas/bear.js';
 import { fetchBearWikitext, fetchImageUrl } from '../upstream/wikipedia.js';
+import { UpstreamError } from '../errors.js';
 
 interface ParsedBear extends Bear {
   fileName: string | null;
@@ -49,7 +50,7 @@ function parseBear(row: string): ParsedBear {
   const imageMatch = row.match(/\|image=File:(.*?)\s+\|image-size=/);
 
   if (nameMatch === null || binomialMatch === null || rangeMatch === null) {
-    throw new Error('Could not parse required bear data.');
+    throw new UpstreamError('Wikipedia returned unparsable bear data');
   }
 
   const binomial = binomialMatch[1].trim();
