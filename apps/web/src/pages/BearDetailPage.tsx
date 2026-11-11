@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router';
 import { HighlightText } from '../features/search/HighlightText';
 import type { BearState } from '../types';
 import type { ReactElement } from 'react';
+import { Comments } from '../features/comments/Comments';
 
 const PLACEHOLDER_IMAGE = '/media/placeholder.jpg';
 
@@ -83,6 +84,7 @@ export function BearDetailPage({
           </strong>{' '}
           <HighlightText text={bear.range} query={searchTerm} />
         </p>
+        <Comments bearId={bear.id} searchTerm={searchTerm} />
       </article>
     </main>
   );

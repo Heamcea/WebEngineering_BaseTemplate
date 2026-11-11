@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { HighlightText } from '../search/HighlightText';
 
@@ -6,33 +6,70 @@ import type { FormEvent, ReactElement } from 'react';
 
 interface Comment {
   id: string;
-  name: string;
+  bearId: string;
+  author: string;
   text: string;
+  createdAt: string;
 }
 
 interface CommentsProps {
+  bearId: string;
   searchTerm: string;
 }
 
-const initialComments: Comment[] = [
-  {
-    id: 'bob-fossil',
-    name: 'Bob Fossil',
-    text: 'Oh I am so glad you taught me all about the big brown angry guys...',
-  },
-];
-
-export function Comments({ searchTerm }: CommentsProps): ReactElement {
+export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
   const [showComments, setShowComments] = useState(false);
 
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
 
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadComments(): Promise<void> {
+      setLoading(true);
+      setError(null);
+      setComments([]);
+
+      try {
+        const response = await fetch(`/api/bears/${bearId}/comments`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Could not load comments: ${response.status}`);
+        }
+
+        const data = (await response.json()) as Comment[];
+        setComments(data);
+      } catch (error: unknown) {
+        if (!controller.signal.aborted) {
+          setError('Could not load comments. Please try again later.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadComments();
+
+    return () => {
+      controller.abort();
+    };
+  }, [bearId]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
+    void submitComment();
+  }
 
+  async function submitComment(): Promise<void> {
     const trimmedName = name.trim();
     const trimmedComment = comment.trim();
 
@@ -40,16 +77,53 @@ export function Comments({ searchTerm }: CommentsProps): ReactElement {
       return;
     }
 
-    const newComment: Comment = {
-      id: crypto.randomUUID(),
-      name: trimmedName,
-      text: trimmedComment,
-    };
+    setError(null);
 
-    setComments((currentComments) => [...currentComments, newComment]);
+    try {
+      const response = await fetch(`/api/bears/${bearId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          author: trimmedName,
+          text: trimmedComment,
+        }),
+      });
 
-    setName('');
-    setComment('');
+      if (!response.ok) {
+        throw new Error(`Could not create comment: ${response.status}`);
+      }
+
+      const newComment = (await response.json()) as Comment;
+
+      setComments((currentComments) => [...currentComments, newComment]);
+
+      setName('');
+      setComment('');
+    } catch {
+      setError('Could not create comment. Please try again.');
+    }
+  }
+
+  async function handleDelete(commentId: string): Promise<void> {
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Could not delete comment: ${response.status}`);
+      }
+
+      setComments((currentComments) =>
+        currentComments.filter((item) => item.id !== commentId)
+      );
+    } catch {
+      setError('Could not delete comment. Please try again.');
+    }
   }
 
   return (
@@ -104,23 +178,38 @@ export function Comments({ searchTerm }: CommentsProps): ReactElement {
             </div>
           </form>
 
+          {error !== null && <p>{error}</p>}
+
           <h2>
             <HighlightText text="Comments" query={searchTerm} />
           </h2>
 
-          <ul className="comment-container">
-            {comments.map((item) => (
-              <li key={item.id}>
-                <p>
-                  <HighlightText text={item.name} query={searchTerm} />
-                </p>
+          {loading ? (
+            <p>Loading comments...</p>
+          ) : (
+            <ul className="comment-container">
+              {comments.map((item) => (
+                <li key={item.id}>
+                  <p>
+                    <HighlightText text={item.author} query={searchTerm} />
+                  </p>
 
-                <p>
-                  <HighlightText text={item.text} query={searchTerm} />
-                </p>
-              </li>
-            ))}
-          </ul>
+                  <p>
+                    <HighlightText text={item.text} query={searchTerm} />
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleDelete(item.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </section>

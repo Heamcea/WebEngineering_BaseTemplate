@@ -1,5 +1,4 @@
 import { BearList } from '../bears/BearList';
-import { Comments } from '../comments/Comments';
 import { HighlightText } from '../search/HighlightText';
 
 import type { BearState } from '../../types';
@@ -175,9 +174,6 @@ export function Article({ bearState, searchTerm }: ArticleProps): ReactElement {
           />
         </p>
       </aside>
-
-      <Comments searchTerm={searchTerm} />
-
       {renderBears()}
     </article>
   );
