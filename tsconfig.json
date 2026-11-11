@@ -11,5 +11,5 @@
     "types": ["vite/client"],
     "jsx": "react-jsx",
   },
-  "include": ["src"]
+  "include": ["apps/web/src"]
 }

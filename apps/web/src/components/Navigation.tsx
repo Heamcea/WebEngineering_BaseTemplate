@@ -22,7 +22,7 @@ export function Navigation({
   }
 
   return (
-    <div className="nav">
+    <nav>
       <ul>
         <li>
           <a href="#">Home</a>
@@ -51,6 +51,6 @@ export function Navigation({
 
         <input type="submit" value="Go!" />
       </form>
-    </div>
+    </nav>
   );
 }
