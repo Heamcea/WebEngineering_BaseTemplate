@@ -6,6 +6,8 @@ import type { FormEvent, ReactElement } from 'react';
 
 import { getProblemDetail } from '../../problem';
 
+import { apiUrl } from '../../api';
+
 interface Comment {
   id: string;
   bearId: string;
@@ -38,7 +40,7 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
       setComments([]);
 
       try {
-        const response = await fetch(`/api/bears/${bearId}/comments`, {
+        const response = await fetch(apiUrl(`/api/bears/${bearId}/comments`), {
           signal: controller.signal,
         });
 
@@ -84,7 +86,7 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
     setError(null);
 
     try {
-      const response = await fetch(`/api/bears/${bearId}/comments`, {
+      const response = await fetch(apiUrl(`/api/bears/${bearId}/comments`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +118,7 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
     setError(null);
 
     try {
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const response = await fetch(apiUrl(`/api/comments/${commentId}`), {
         method: 'DELETE',
       });
 
