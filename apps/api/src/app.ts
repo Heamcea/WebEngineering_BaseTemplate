@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { bearRoutes } from './routes/bears.js';
 
 import Fastify, { type FastifyInstance } from 'fastify';
 
@@ -14,6 +15,6 @@ export function buildApp(): FastifyInstance {
     version: process.env.APP_VERSION ?? 'dev',
     uptime: Math.round(process.uptime()),
   }));
-
+  void app.register(bearRoutes);
   return app;
 }
