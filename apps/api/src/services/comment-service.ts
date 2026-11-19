@@ -1,36 +1,25 @@
-import { randomUUID } from 'node:crypto';
+import { type CommentData, type NewCommentData } from '../schemas/comment.js';
 
-import {
-  Comment,
-  type CommentData,
-  type NewCommentData,
-} from '../schemas/comment.js';
+import type { CommentRepository } from '../repositories/comment-repository.js';
 
-const comments = new Map<string, CommentData>();
-
-export function getCommentsForBear(bearId: string): CommentData[] {
-  return Array.from(comments.values()).filter(
-    (comment) => comment.bearId === bearId
-  );
+export async function getCommentsForBear(
+  repository: CommentRepository,
+  bearId: string
+): Promise<CommentData[]> {
+  return await repository.listByBear(bearId);
 }
 
-export function createComment(
+export async function createComment(
+  repository: CommentRepository,
   bearId: string,
   input: NewCommentData
-): CommentData {
-  const comment = Comment.parse({
-    id: randomUUID(),
-    bearId,
-    author: input.author,
-    text: input.text,
-    createdAt: new Date().toISOString(),
-  });
-
-  comments.set(comment.id, comment);
-
-  return comment;
+): Promise<CommentData> {
+  return await repository.create(bearId, input);
 }
 
-export function deleteComment(commentId: string): boolean {
-  return comments.delete(commentId);
+export async function deleteComment(
+  repository: CommentRepository,
+  commentId: string
+): Promise<boolean> {
+  return await repository.delete(commentId);
 }

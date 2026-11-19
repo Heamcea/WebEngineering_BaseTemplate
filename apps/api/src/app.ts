@@ -12,8 +12,14 @@ import swaggerUi from '@fastify/swagger-ui';
 import cors from '@fastify/cors';
 import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
 import { AppError } from './errors.js';
+import { repositoriesPlugin } from './plugins/repositories.js';
+import type { Repositories } from './plugins/repositories.js';
 
-export function buildApp(): FastifyInstance {
+interface BuildAppOptions {
+  repos?: Repositories;
+}
+
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({
     logger: true,
     requestIdHeader: 'x-request-id',
@@ -51,7 +57,9 @@ export function buildApp(): FastifyInstance {
   app.addHook('onSend', async (request, reply) => {
     void reply.header('x-request-id', request.id);
   });
-
+  void app.register(repositoriesPlugin, {
+    repos: options.repos,
+  });
   void app.register(healthRoutes);
   void app.register(bearRoutes);
   void app.register(commentRoutes);

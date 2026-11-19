@@ -19,7 +19,7 @@ export const bearRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async () => {
-      return await getBears();
+      return await getBears(app.repos.bears);
     }
   );
 
@@ -41,7 +41,7 @@ export const bearRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => {
-      const bear = await getBearById(request.params.id);
+      const bear = await getBearById(app.repos.bears, request.params.id);
 
       if (bear === undefined) {
         throw new NotFoundError('Bear not found');

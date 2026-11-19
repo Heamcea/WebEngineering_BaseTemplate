@@ -30,14 +30,14 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         },
       },
     },
-    async (request, reply) => {
-      const bear = await getBearById(request.params.id);
+    async (request) => {
+      const bear = await getBearById(app.repos.bears, request.params.id);
 
       if (bear === undefined) {
         throw new NotFoundError('Bear not found');
       }
 
-      return getCommentsForBear(request.params.id);
+      return await getCommentsForBear(app.repos.comments, request.params.id);
     }
   );
 
@@ -61,13 +61,17 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
-      const bear = await getBearById(request.params.id);
+      const bear = await getBearById(app.repos.bears, request.params.id);
 
       if (bear === undefined) {
         throw new NotFoundError('Bear not found');
       }
 
-      const comment = createComment(request.params.id, request.body);
+      const comment = await createComment(
+        app.repos.comments,
+        request.params.id,
+        request.body
+      );
 
       return await reply
         .code(201)
@@ -92,7 +96,10 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
-      const deleted = deleteComment(request.params.commentId);
+      const deleted = await deleteComment(
+        app.repos.comments,
+        request.params.commentId
+      );
 
       if (!deleted) {
         throw new NotFoundError('Comment not found');

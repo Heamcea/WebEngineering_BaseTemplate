@@ -1,24 +1,26 @@
 # Web Engineering Coding Playground Template
 
-This repository is designed as the foundation for coding playgrounds in the Web Engineering course. It offers a structured space for experimenting with and mastering various web development technologies and practices. 
+This repository is designed as the foundation for coding playgrounds in the Web Engineering course. It offers a structured space for experimenting with and mastering various web development technologies and practices.
 The project is based on [this](https://developer.mozilla.org/en-US/docs/Learn/Accessibility/Accessibility_troubleshooting) repository from MDN.
 
-The project introduces a lot of code smells for you to tackle. 
+The project introduces a lot of code smells for you to tackle.
 **Let's get coding!**
 
 ## Submission Details and Deadlines
-* Coding playgrounds are **individual** work
-* Use this base template to create your project repository.
-* Submit your repository link once.
-* Each playground must be submitted via a new branch in that repository (last commit within deadline will be graded).
-  * Naming conventions of branch: <code>playground-1</code>, <code>playground-2</code>, ...
-* Each playground consists of 5 tasks, 1 point each. A task is complete only when both its implementation work and its theory question have been answered.
+
+- Coding playgrounds are **individual** work
+- Use this base template to create your project repository.
+- Submit your repository link once.
+- Each playground must be submitted via a new branch in that repository (last commit within deadline will be graded).
+  - Naming conventions of branch: <code>playground-1</code>, <code>playground-2</code>, ...
+- Each playground consists of 5 tasks, 1 point each. A task is complete only when both its implementation work and its theory question have been answered.
 
 ### Submission Deadlines
-* [1st Playground](#1-js-playground): 14.09.2026
-* [2nd Playground](#2-dependency--and-build-management-playground): 28.09.2026
-* [3rd Playground](#3-migrate-to-a-frontend-framework): 04.10.2026
-* other Playgrounds TBA by Thomas Berger
+
+- [1st Playground](#1-js-playground): 14.09.2026
+- [2nd Playground](#2-dependency--and-build-management-playground): 28.09.2026
+- [3rd Playground](#3-migrate-to-a-frontend-framework): 04.10.2026
+- other Playgrounds TBA by Thomas Berger
 
 ## Features
 
@@ -28,21 +30,23 @@ The project introduces a lot of code smells for you to tackle.
 - Worst JS coding practices :cold_sweat:
 - No Build and Dependency Management at all :fire:
 
-
 # Coding Playground Description
 
 ## 1. JS Playground
-The provided base project template contains bad coding and templating practices and bugs for you to fix. Take a look into the component files and get a grasp of the inner workings of the provided project. The app should provide the requirements described below. Some are implemented poorly or do not work at all. 
+
+The provided base project template contains bad coding and templating practices and bugs for you to fix. Take a look into the component files and get a grasp of the inner workings of the provided project. The app should provide the requirements described below. Some are implemented poorly or do not work at all.
 
 ### App Requirements
-* On page load the app requests the Wikipedia API to extract bear information from Wikipedia's [list of ursids](https://en.wikipedia.org/wiki/List_of_ursids). The page then renders the provided image, the common name, the scientific name and it's range.
-  * the bears should be ordered in the same order and number (no duplicates) as in the corresponding Wiki page.
-  * if there is no image available, the app should show a placeholder image.
-* Users are able to toggle the comment section.
-* Users are able to leave their name and a comment (both should not be empty).
-* Users are able to search the web page contents using a search query, whereby only the html contents with tag <code>article</code> should be highlighted.
+
+- On page load the app requests the Wikipedia API to extract bear information from Wikipedia's [list of ursids](https://en.wikipedia.org/wiki/List_of_ursids). The page then renders the provided image, the common name, the scientific name and it's range.
+  - the bears should be ordered in the same order and number (no duplicates) as in the corresponding Wiki page.
+  - if there is no image available, the app should show a placeholder image.
+- Users are able to toggle the comment section.
+- Users are able to leave their name and a comment (both should not be empty).
+- Users are able to search the web page contents using a search query, whereby only the html contents with tag <code>article</code> should be highlighted.
 
 ### Tasks
+
 Fix the application code and support them with short code examples where useful.
 
 #### Task 1: Introduce ES modules
@@ -76,6 +80,7 @@ Find and eliminate the remaining bad coding practices. Consider scope, accidenta
 **Theory question:** Select one of your refactorings and explain how JavaScript scope, closures, references, or prototypes caused the original risk. State how you verified that your refactoring preserved behavior.
 
 > **What bad coding practices did you find? Why is it a bad practice and how did you fix it?**
+
 ### 1. Unused variables
 
 **Bad practice:**
@@ -99,7 +104,7 @@ The unused variable was removed completely.
 **Bad practice:**
 
 ```js
-var rows = wikitext.split("{{Species table/row").slice(1);
+var rows = wikitext.split('{{Species table/row').slice(1);
 ```
 
 **Problem:**  
@@ -108,7 +113,7 @@ Using `var` can lead to reassignment mistakes and does not provide block-scoped 
 **Good practice:**
 
 ```js
-const rows = wikitext.split("{{Species table/row").slice(1);
+const rows = wikitext.split('{{Species table/row').slice(1);
 ```
 
 Variables that are not reassigned now use `const`. This reduces accidental reassignment and provides block-scoped bindings.
@@ -120,10 +125,10 @@ Variables that are not reassigned now use `const`. This reduces accidental reass
 **Bad practice:**
 
 ```js
-document.querySelector(".more_bears").appendChild(bearElement);
+document.querySelector('.more_bears').appendChild(bearElement);
 
 // later again
-document.querySelector(".more_bears").appendChild(errorElement);
+document.querySelector('.more_bears').appendChild(errorElement);
 ```
 
 **Problem:**  
@@ -132,7 +137,7 @@ The same DOM element does not need to be searched for multiple times.
 **Good practice:**
 
 ```js
-const moreBears = document.querySelector(".more_bears");
+const moreBears = document.querySelector('.more_bears');
 
 moreBears.appendChild(bearElement);
 moreBears.appendChild(errorElement);
@@ -148,10 +153,10 @@ The element is queried once and stored in the surrounding scope so it can be reu
 
 ```js
 async function extractBears(wikitext) {
-    // parse Wikipedia data
-    // create DOM elements
-    // load images
-    // handle placeholder images
+  // parse Wikipedia data
+  // create DOM elements
+  // load images
+  // handle placeholder images
 }
 ```
 
@@ -163,8 +168,7 @@ async function extractBears(wikitext) {
 ```js
 const bear = parseBear(row);
 
-const { bearElement, imageElement } =
-    createBearElement(bear);
+const { bearElement, imageElement } = createBearElement(bear);
 
 await loadBearImage(bear, imageElement);
 ```
@@ -188,8 +192,7 @@ This makes each function responsible for one specific task and improves maintain
 **Bad practice:**
 
 ```js
-nameElement.innerHTML =
-    "<b>" + bear.name + "</b> (" + bear.binomial + ")";
+nameElement.innerHTML = '<b>' + bear.name + '</b> (' + bear.binomial + ')';
 ```
 
 **Problem:**  
@@ -198,12 +201,10 @@ The bear name and binomial come from Wikipedia. External data should not unneces
 **Good practice:**
 
 ```js
-const boldName = document.createElement("b");
+const boldName = document.createElement('b');
 boldName.textContent = bear.name;
 
-const scientificName = document.createTextNode(
-    " (" + bear.binomial + ")"
-);
+const scientificName = document.createTextNode(' (' + bear.binomial + ')');
 
 nameElement.appendChild(boldName);
 nameElement.appendChild(scientificName);
@@ -245,13 +246,13 @@ The variables were renamed so their purpose is clearer.
 **Bad practice:**
 
 ```js
-imageElement.src = "./media/placeholder.jpg";
+imageElement.src = './media/placeholder.jpg';
 
 // later
-imageElement.src = "./media/placeholder.jpg";
+imageElement.src = './media/placeholder.jpg';
 
 // later
-imageElement.src = "./media/placeholder.jpg";
+imageElement.src = './media/placeholder.jpg';
 ```
 
 **Problem:**  
@@ -260,7 +261,7 @@ The placeholder image path was repeated in multiple places. This can cause maint
 **Good practice:**
 
 ```js
-const PLACEHOLDER_IMAGE = "./media/placeholder.jpg";
+const PLACEHOLDER_IMAGE = './media/placeholder.jpg';
 ```
 
 The constant is reused wherever the placeholder image is required:
@@ -271,9 +272,9 @@ imageElement.src = PLACEHOLDER_IMAGE;
 
 The path is now defined in one place and can be changed easily.
 
-
 ## 2. Dependency- and Build Management Playground
-Build the application with ``npm`` and a build and a dependency management tool of your choice (e.g. [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or others). 
+
+Build the application with `npm` and a build and a dependency management tool of your choice (e.g. [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or others).
 
 ### Tasks
 
@@ -299,12 +300,12 @@ Configure ESLint and Prettier using the rulesets below. Resolve all reported err
 
 Define the following tasks within `npm scripts`:
 
-  * `dev`: starts the development server.
-  * `build`: runs the typescript compiler and bundles your application - bundling depends on your chosen build tool (e.g. Vite, Webpack) but typically bundles multiple files into one, applies optimizations like minification and obfuscation and outputs final results to a `dist` or `build` directory.
-  * `lint`: runs ESLint on all  `.js` and `.ts` files in your projects `/src` directory.
-  * `lint:fix`: runs and also fixes all issues found by ESLint.
-  * `format`: formats all `.js` and `.ts` files in your projects `/src` directory.
-  * `format:check`: checks if the files in the `/src` directory are formatted according to Prettier's rules.
+- `dev`: starts the development server.
+- `build`: runs the typescript compiler and bundles your application - bundling depends on your chosen build tool (e.g. Vite, Webpack) but typically bundles multiple files into one, applies optimizations like minification and obfuscation and outputs final results to a `dist` or `build` directory.
+- `lint`: runs ESLint on all `.js` and `.ts` files in your projects `/src` directory.
+- `lint:fix`: runs and also fixes all issues found by ESLint.
+- `format`: formats all `.js` and `.ts` files in your projects `/src` directory.
+- `format:check`: checks if the files in the `/src` directory are formatted according to Prettier's rules.
 
 The `build`, `lint`, and `format:check` commands must exit with a non-zero status when their checks fail.
 
@@ -316,11 +317,11 @@ Configure a pre-commit hook that checks staged code using [husky](https://typico
 
 **Theory question:** Compare a local pre-commit hook with a CI quality gate. Why is CI still necessary when hooks are configured, and why should CI use non-mutating checks rather than automatically rewriting source files?
 
-
 **ESLint Configurations**
 
 Use ESLint configs [standard-with-typescript](https://www.npmjs.com/package/eslint-config-standard-with-typescript) and [TypeScript ESLint Plugin](https://www.npmjs.com/package/@typescript-eslint/eslint-plugin).
 Your `.eslintrc` file should have the following extensions:
+
 ```.eslintrc.yml
 ...
 extends:
@@ -330,11 +331,12 @@ extends:
   - prettier
 ...
 ```
- 
+
 **Prettier Configurations**
 
 Apply the following ruleset for Prettier:
-``` .prettierrc
+
+```.prettierrc
 {
   "semi": true,
   "singleQuote": true,
@@ -345,6 +347,7 @@ Apply the following ruleset for Prettier:
 ```
 
 ## 3. Migrate to a Frontend Framework
+
 In this playground you will migrate your application to React with TypeScript while retaining the build and quality pipeline from Playground 2.
 
 ### Tasks
@@ -382,22 +385,159 @@ Add at least a list route and a bear-detail route using a stable bear identifier
 ---
 
 ## In-Class Accessibility Workshop
+
 You might have noticed that the base project has a number of accessibility issues - your task is to explore the existing site and fix them. Use the tools presented in our accessibility workshop to test the accessibility of your app and write a summary of your reports below.
 
 ### Tasks
-* Accessibility Checks:
-  * **Color**: Test the current color contrast (text/background), report the results of the test, and then fix them by changing the assigned colors.
-  * **Semantic HTML**: Report on what happens when you try to navigate the page using a screen reader. Fix those navigation issues.
-  * **Audio**: The ``<audio>`` player isn't accessible to hearing impaired people — can you add some kind of accessible alternative for these users?
-  * **Forms**:
-    * The ``<input>`` element in the search form at the top could do with a label, but we don't want to add a visible text label that would potentially spoil the design and isn't really needed by sighted users. Fix this issue by adding a label that is only accessible to screen readers.
-    * The two ``<input>`` elements in the comment form have visible text labels, but they are not unambiguously associated with their labels — how do you achieve this? Note that you'll need to update some of the CSS rule as well.
-  * **Comment Section**: The show/hide comment control button is not currently keyboard-accessible. Can you make it keyboard accessible, both in terms of focusing it using the tab key, and activating it using the return key?
-  * **The table**: The data table is not currently very accessible — it is hard for screen reader users to associate data rows and columns together, and the table also has no kind of summary to make it clear what it shows. Can you add some features to your HTML to fix this problem?
 
+- Accessibility Checks:
+  - **Color**: Test the current color contrast (text/background), report the results of the test, and then fix them by changing the assigned colors.
+  - **Semantic HTML**: Report on what happens when you try to navigate the page using a screen reader. Fix those navigation issues.
+  - **Audio**: The `<audio>` player isn't accessible to hearing impaired people — can you add some kind of accessible alternative for these users?
+  - **Forms**:
+    - The `<input>` element in the search form at the top could do with a label, but we don't want to add a visible text label that would potentially spoil the design and isn't really needed by sighted users. Fix this issue by adding a label that is only accessible to screen readers.
+    - The two `<input>` elements in the comment form have visible text labels, but they are not unambiguously associated with their labels — how do you achieve this? Note that you'll need to update some of the CSS rule as well.
+  - **Comment Section**: The show/hide comment control button is not currently keyboard-accessible. Can you make it keyboard accessible, both in terms of focusing it using the tab key, and activating it using the return key?
+  - **The table**: The data table is not currently very accessible — it is hard for screen reader users to associate data rows and columns together, and the table also has no kind of summary to make it clear what it shows. Can you add some features to your HTML to fix this problem?
 
->
 > _Note your findings here..._
->
+
+# Web Engineering – Playground 5
+
+Implemented: **Tasks 1–3**
+
+- Task 1: PostgreSQL
+- Task 2: Schema, Migration & Seed
+- Task 3: Repository Layer
+
+Tasks 4 and 5 are not implemented.
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env
+docker compose up --build
+```
+
+## Database
+
+Apply migrations:
+
+```bash
+npm run db:migrate -w apps/api
+```
+
+Seed the bears:
+
+```bash
+npm run db:seed -w apps/api
+```
+
+For a completely fresh database:
+
+```bash
+docker compose down -v
+docker compose up -d db
+npm run db:migrate -w apps/api
+npm run db:seed -w apps/api
+```
+
+Then start the application:
+
+```bash
+npm run dev
+```
+
+## Task 1 – PostgreSQL
+
+PostgreSQL runs through Docker Compose and uses a named volume.
+
+The API uses a `pg.Pool` for database connections.
+
+Health endpoints:
+
+```text
+GET /health
+GET /health/ready
+```
+
+`/health` is the liveness check.
+
+`/health/ready` performs `SELECT 1` and returns `503` if PostgreSQL is unavailable.
+
+## Task 2 – Drizzle
+
+The database schema is defined with Drizzle ORM.
+
+Tables:
+
+```text
+bears
+comments
+```
+
+Comments reference bears through `bear_id` with `ON DELETE CASCADE`.
+
+The generated SQL migration is committed to the repository.
+
+The seed fetches the bear data using the existing Playground 4 Wikipedia/BFF implementation and stores it in PostgreSQL.
+
+`GET /api/bears` reads the bears from the database.
+
+## Task 3 – Repository Layer
+
+The application uses:
+
+```text
+BearRepository
+CommentRepository
+```
+
+with two implementations:
+
+```text
+DrizzleBearRepository
+DrizzleCommentRepository
+
+MemoryBearRepository
+MemoryCommentRepository
+```
+
+The normal application uses the Drizzle repositories with PostgreSQL.
+
+Tests use the in-memory repositories.
+
+Repositories are injected through Fastify using `app.repos`.
+
+```text
+Route
+↓
+Service
+↓
+Repository Interface
+↓
+Drizzle / Memory Repository
+```
+
+Routes and services therefore contain no direct SQL or Drizzle queries.
+
+Comments are persisted in PostgreSQL and survive an API restart.
+
+## Tests
+
+```bash
+npm run test -w apps/api
+```
+
+The tests use the in-memory repositories and can run without PostgreSQL.
+
+## Checks
+
+```bash
+npm run lint
+npm run typecheck -w apps/api
+npm run test -w apps/api
+```
 
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

@@ -1,11 +1,8 @@
-import { eq } from 'drizzle-orm';
-
 import { BearSchema, type Bear } from '../schemas/bear.js';
 import { fetchBearWikitext, fetchImageUrl } from '../upstream/wikipedia.js';
 import { UpstreamError } from '../errors.js';
 
-import { db } from '../db/db.js';
-import { bears } from '../db/schema.js';
+import type { BearRepository } from '../repositories/bear-repository.js';
 
 interface ParsedBear extends Bear {
   fileName: string | null;
@@ -49,35 +46,17 @@ export async function fetchBearsFromWikipedia(): Promise<Bear[]> {
   return bearsWithImages;
 }
 
-export async function getBears(): Promise<Bear[]> {
-  const rows = await db.select().from(bears);
-
-  return rows.map((row) =>
-    BearSchema.parse({
-      id: row.id,
-      name: row.name,
-      binomial: row.binomial,
-      range: row.range,
-      imageUrl: row.imageUrl,
-    })
-  );
+export async function getBears(repository: BearRepository): Promise<Bear[]> {
+  return await repository.list();
 }
 
-export async function getBearById(id: string): Promise<Bear | undefined> {
-  const [row] = await db.select().from(bears).where(eq(bears.id, id)).limit(1);
-
-  if (row === undefined) {
-    return undefined;
-  }
-
-  return BearSchema.parse({
-    id: row.id,
-    name: row.name,
-    binomial: row.binomial,
-    range: row.range,
-    imageUrl: row.imageUrl,
-  });
+export async function getBearById(
+  repository: BearRepository,
+  id: string
+): Promise<Bear | undefined> {
+  return await repository.findById(id);
 }
+
 function parseBear(row: string): ParsedBear {
   const nameMatch = row.match(/\|name=\[\[(.*?)\]\]/);
   const binomialMatch = row.match(/\|binomial=(.*?)\n/);
