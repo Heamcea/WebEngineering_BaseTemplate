@@ -18,6 +18,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "concurrently": "^10.0.7",

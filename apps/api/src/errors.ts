@@ -28,3 +28,9 @@ export class UpstreamTimeoutError extends AppError {
   readonly type = `${PROBLEM_BASE}/upstream-timeout`;
   readonly title = 'Upstream timeout';
 }
+
+export class DatabaseUnavailableError extends AppError {
+  readonly status = 503;
+  readonly type = `${PROBLEM_BASE}/database-unavailable`;
+  readonly title = 'Database unavailable';
+}
