@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { BearDetailPage } from './pages/BearDetailPage';
 import { HomePage } from './pages/HomePage';
+import { RegisterPage } from './pages/RegisterPage';
 import { fetchBears } from './bears';
 import type { ReactElement } from 'react';
 import type { BearState } from './types';
@@ -93,6 +94,8 @@ export function App(): ReactElement {
             <BearDetailPage bearState={bearState} searchTerm={searchTerm} />
           }
         />
+
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
 
       <Footer />

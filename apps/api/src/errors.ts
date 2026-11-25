@@ -34,3 +34,9 @@ export class DatabaseUnavailableError extends AppError {
   readonly type = `${PROBLEM_BASE}/database-unavailable`;
   readonly title = 'Database unavailable';
 }
+
+export class ConflictError extends AppError {
+  readonly status = 409;
+  readonly type = 'about:blank';
+  readonly title = 'Conflict';
+}

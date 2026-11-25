@@ -14,6 +14,7 @@ import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
 import { AppError } from './errors.js';
 import { repositoriesPlugin } from './plugins/repositories.js';
 import type { Repositories } from './plugins/repositories.js';
+import { authRoutes } from './routes/auth.js';
 
 interface BuildAppOptions {
   repos?: Repositories;
@@ -63,6 +64,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   void app.register(healthRoutes);
   void app.register(bearRoutes);
   void app.register(commentRoutes);
+  void app.register(authRoutes);
 
   app.setErrorHandler<FastifyError>(async (error, request, reply) => {
     if (error.validation !== undefined) {

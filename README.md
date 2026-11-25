@@ -540,4 +540,19 @@ npm run typecheck -w apps/api
 npm run test -w apps/api
 ```
 
+## Playground 6 – Authentication and Web Security
+
+### Task 1 – Users and password storage
+
+- Users table created through a Drizzle migration.
+- UserRepository with Drizzle and memory implementations.
+- Registration endpoint: POST /api/auth/register.
+- Email and password validation using Zod.
+- Password hashing using Argon2id (m=65536, t=3, p=4).
+- Duplicate emails return 409 Conflict.
+- Unique constraint prevents duplicate registrations
+  during concurrent requests.
+- Registration form implemented in React.
+- Registration tests using Vitest and Fastify inject.
+
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

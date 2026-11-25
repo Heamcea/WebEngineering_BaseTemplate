@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
+import { Link } from 'react-router';
 
 interface NavigationProps {
   searchTerm: string;
@@ -35,6 +36,9 @@ export function Navigation({
         </li>
         <li>
           <a href="#">Blog</a>
+        </li>
+        <li>
+          <Link to="/register">Register</Link>
         </li>
       </ul>
 
