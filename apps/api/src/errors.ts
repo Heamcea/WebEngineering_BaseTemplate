@@ -40,3 +40,9 @@ export class ConflictError extends AppError {
   readonly type = 'about:blank';
   readonly title = 'Conflict';
 }
+
+export class UnauthorizedError extends AppError {
+  readonly status = 401;
+  readonly type = 'about:blank';
+  readonly title = 'Unauthorized';
+}

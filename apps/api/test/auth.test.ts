@@ -9,6 +9,7 @@ const { buildApp } = await import('../src/app.js');
 import { MemoryBearRepository } from '../src/repositories/test/memory-bear-repository.js';
 import { MemoryCommentRepository } from '../src/repositories/test/memory-comment-repository.js';
 import { MemoryUserRepository } from '../src/repositories/test/memory-user-repository.js';
+import { MemorySessionRepository } from '../src/repositories/test/memory-session-repository.js';
 
 describe('Auth API', () => {
   let app: ReturnType<typeof buildApp>;
@@ -22,6 +23,7 @@ describe('Auth API', () => {
         bears: new MemoryBearRepository([]),
         comments: new MemoryCommentRepository(),
         users,
+        sessions: new MemorySessionRepository(),
       },
     });
   });
@@ -119,5 +121,113 @@ it('returns 400 for a short password', async () => {
   const user = await users.findByEmail('alice@example.com');
 
   expect(user).toBeUndefined();
+});
+it('logs in, returns the current user and invalidates the session on logout', async () => {
+  const credentials = {
+    email: 'test@example.com',
+    password: 'TestPassword123',
+  };
+
+  const registration = await app.inject({
+    method: 'POST',
+    url: '/api/auth/register',
+    payload: credentials,
+  });
+
+  expect(registration.statusCode).toBe(201);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: credentials,
+  });
+
+  expect(login.statusCode).toBe(200);
+
+  const setCookie = login.headers['set-cookie'];
+
+  const cookieHeader = Array.isArray(setCookie)
+    ? setCookie[0]
+    : setCookie;
+
+  const cookie = cookieHeader?.split(';')[0];
+
+  if (cookie === undefined || cookie === '') {
+    throw new Error('Session cookie missing');
+  }
+
+  expect(cookieHeader).toContain('HttpOnly');
+  expect(cookieHeader).toContain('SameSite=Lax');
+  expect(cookieHeader).toContain('Path=/');
+
+  const me = await app.inject({
+    method: 'GET',
+    url: '/api/auth/me',
+    headers: { cookie },
+  });
+
+  expect(me.statusCode).toBe(200);
+  expect(me.json()).toEqual(registration.json());
+
+  const logout = await app.inject({
+    method: 'POST',
+    url: '/api/auth/logout',
+    headers: { cookie },
+  });
+
+  expect(logout.statusCode).toBe(204);
+
+  const afterLogout = await app.inject({
+    method: 'GET',
+    url: '/api/auth/me',
+    headers: { cookie },
+  });
+
+  expect(afterLogout.statusCode).toBe(401);
+});
+it('rejects invalid login credentials', async () => {
+  await app.inject({
+    method: 'POST',
+    url: '/api/auth/register',
+    payload: {
+      email: 'test@example.com',
+      password: 'TestPassword123',
+    },
+  });
+
+  const wrongPassword = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: {
+      email: 'test@example.com',
+      password: 'WrongPassword123',
+    },
+  });
+
+  const unknownUser = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: {
+      email: 'unknown@example.com',
+      password: 'WrongPassword123',
+    },
+  });
+
+  expect(wrongPassword.statusCode).toBe(401);
+  expect(unknownUser.statusCode).toBe(401);
+
+  expect(wrongPassword.json().detail).toBe('Invalid credentials');
+  expect(unknownUser.json().detail).toBe('Invalid credentials');
+
+  expect(wrongPassword.headers['set-cookie']).toBeUndefined();
+  expect(unknownUser.headers['set-cookie']).toBeUndefined();
+});
+it('rejects requests without a session cookie', async () => {
+  const response = await app.inject({
+    method: 'GET',
+    url: '/api/auth/me',
+  });
+
+  expect(response.statusCode).toBe(401);
 });
 });

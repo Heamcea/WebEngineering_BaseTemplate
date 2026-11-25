@@ -1,36 +1,55 @@
 import { useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
-import { registerUser } from '../auth';
+import { registerUser, loginUser } from '../auth';
+import type { AuthUser } from '../auth';
+import { useNavigate } from 'react-router';
 
-export function RegisterPage(): ReactElement {
+interface RegisterPageProps {
+  onLogin: (user: AuthUser) => void;
+}
+
+export function RegisterPage({ onLogin }: RegisterPageProps): ReactElement {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
 
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+
+    const isRegister =
+      submitter instanceof HTMLButtonElement && submitter.value === 'register';
+
     setError('');
     setSuccess(false);
     setLoading(true);
 
     try {
-      await registerUser(email, password);
+      if (isRegister) {
+        await registerUser(email, password);
 
-      setSuccess(true);
-      setEmail('');
-      setPassword('');
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Registration failed.');
+        setSuccess(true);
+        setPassword('');
+      } else {
+        const user = await loginUser(email, password);
+
+        onLogin(user);
+        void navigate('/');
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Authentication failed'
+      );
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <main
       style={{
@@ -41,7 +60,7 @@ export function RegisterPage(): ReactElement {
         minHeight: '15vh',
       }}
     >
-      <h2>Register</h2>
+      <h2>Login / Register</h2>
 
       <form
         style={{
@@ -78,7 +97,6 @@ export function RegisterPage(): ReactElement {
         <input
           id="password"
           type="password"
-          autoComplete="new-password"
           value={password}
           onChange={(event) => {
             setPassword(event.target.value);
@@ -91,9 +109,15 @@ export function RegisterPage(): ReactElement {
           }}
         />
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="submit" value="login" disabled={loading}>
+            Login
+          </button>
+
+          <button type="submit" value="register" disabled={loading}>
+            Register
+          </button>
+        </div>
 
         {error !== '' && (
           <p style={{ fontSize: '22px' }} role="alert">

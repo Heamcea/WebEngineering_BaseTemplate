@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { MemoryUserRepository } from '../src/repositories/test/memory-user-repository.js';
 import { MemoryBearRepository } from '../src/repositories/test/memory-bear-repository.js';
 import { MemoryCommentRepository } from '../src/repositories//test/memory-comment-repository.js';
+import { MemorySessionRepository } from '../src/repositories/test/memory-session-repository.js';
 import type { Bear } from '../src/schemas/bear.js';
 
 //dummy
@@ -32,6 +33,7 @@ describe('comments API', () => {
         bears: new MemoryBearRepository(testBears),
         comments: new MemoryCommentRepository(),
         users: new MemoryUserRepository(),
+        sessions: new MemorySessionRepository(),
       },
     });
 
@@ -83,6 +85,7 @@ describe('comments API', () => {
         bears: new MemoryBearRepository(testBears),
         comments: new MemoryCommentRepository(),
         users: new MemoryUserRepository(),
+        sessions: new MemorySessionRepository(),
       },
     });
 

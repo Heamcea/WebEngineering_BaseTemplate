@@ -10,3 +10,8 @@ export const User = z.object({
   email: z.string().email(),
   role: z.string(),
 });
+
+export const LoginUser = z.object({
+  email: z.string().trim().email().toLowerCase(),
+  password: z.string().min(1).max(128),
+});

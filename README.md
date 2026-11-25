@@ -555,4 +555,14 @@ npm run test -w apps/api
 - Registration form implemented in React.
 - Registration tests using Vitest and Fastify inject.
 
+### Task 2 – ADR: Authentication with Server-Side Sessions
+
+**Context:** The Bear App needs authentication across multiple HTTP requests.
+**Options:** Server-side sessions or JSON Web Tokens (JWT).
+**Decision:** I used server-side sessions stored in PostgreSQL.
+Because the existing database and repository architecture can be reused. A random 256-bit session ID is stored in an HttpOnly cookie. Cookies use SameSite=Lax, Path=/ and Secure in production.
+Sessions expire after eight hours.
+**Consequences:** Sessions can be invalidated immediately on logout.
+No JWT blocklist or refresh token mechanism is required.
+However, session validation requires database access and server-side state.
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>

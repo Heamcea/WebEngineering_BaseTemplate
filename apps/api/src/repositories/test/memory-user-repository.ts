@@ -30,4 +30,8 @@ export class MemoryUserRepository implements UserRepository {
 
     return user;
   }
+
+  async findById(id: string): Promise<UserData | undefined> {
+    return Array.from(this.users.values()).find((user) => user.id === id);
+  }
 }

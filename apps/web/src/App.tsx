@@ -8,6 +8,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { fetchBears } from './bears';
 import type { ReactElement } from 'react';
 import type { BearState } from './types';
+import { getCurrentUser, logoutUser } from './auth';
+import type { AuthUser } from './auth';
 
 import { Route, Routes, useSearchParams } from 'react-router';
 
@@ -19,6 +21,41 @@ export function App(): ReactElement {
   const [bearState, setBearState] = useState<BearState>({
     status: 'loading',
   });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadUser(): Promise<void> {
+      try {
+        const currentUser = await getCurrentUser();
+
+        if (active) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        if (active) {
+          setAuthError(
+            error instanceof Error ? error.message : 'Failed to load user'
+          );
+        }
+      } finally {
+        if (active) {
+          setAuthLoading(false);
+        }
+      }
+    }
+
+    void loadUser();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   function handleSearch(query: string): void {
     const newSearchParams = new URLSearchParams(searchParams);
 
@@ -29,6 +66,20 @@ export function App(): ReactElement {
     }
 
     setSearchParams(newSearchParams);
+  }
+  async function handleLogout(): Promise<void> {
+    setAuthError('');
+    setLogoutLoading(true);
+
+    try {
+      await logoutUser();
+
+      setUser(null);
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Logout failed');
+    } finally {
+      setLogoutLoading(false);
+    }
   }
   useEffect(() => {
     const controller = new AbortController();
@@ -80,7 +131,25 @@ export function App(): ReactElement {
     <>
       <Header />
 
-      <Navigation searchTerm={searchTerm} onSearch={handleSearch} />
+      <Navigation
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
+        user={user}
+        authLoading={authLoading}
+        logoutLoading={logoutLoading}
+        onLogout={() => {
+          void handleLogout();
+        }}
+      />
+      <p>
+        {authLoading
+          ? 'Checking login...'
+          : user === null
+            ? 'Not logged in'
+            : `Logged in as: ${user.email}`}
+      </p>
+
+      {authError !== '' && <p role="alert">{authError}</p>}
 
       <Routes>
         <Route
@@ -95,7 +164,21 @@ export function App(): ReactElement {
           }
         />
 
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/register"
+          element={
+            authLoading ? (
+              <p>Checking login...</p>
+            ) : (
+              <RegisterPage
+                onLogin={(loggedInUser) => {
+                  setUser(loggedInUser);
+                  setAuthError('');
+                }}
+              />
+            )
+          }
+        />
       </Routes>
 
       <Footer />

@@ -14,4 +14,5 @@ export interface NewUserData {
 export interface UserRepository {
   findByEmail: (email: string) => Promise<UserData | undefined>;
   create: (input: NewUserData) => Promise<UserData | undefined>;
+  findById: (id: string) => Promise<UserData | undefined>;
 }

@@ -15,6 +15,7 @@ import { AppError } from './errors.js';
 import { repositoriesPlugin } from './plugins/repositories.js';
 import type { Repositories } from './plugins/repositories.js';
 import { authRoutes } from './routes/auth.js';
+import cookie from '@fastify/cookie';
 
 interface BuildAppOptions {
   repos?: Repositories;
@@ -61,6 +62,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   void app.register(repositoriesPlugin, {
     repos: options.repos,
   });
+  void app.register(cookie);
   void app.register(healthRoutes);
   void app.register(bearRoutes);
   void app.register(commentRoutes);
