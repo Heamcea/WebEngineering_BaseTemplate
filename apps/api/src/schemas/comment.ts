@@ -10,6 +10,7 @@ export const NewComment = z.object({
 export const Comment = NewComment.extend({
   id: z.string().uuid(),
   bearId: BearId,
+  authorId: z.string().uuid().nullable(),
   createdAt: z.string(),
 });
 

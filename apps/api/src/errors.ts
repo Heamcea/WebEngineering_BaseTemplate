@@ -46,3 +46,9 @@ export class UnauthorizedError extends AppError {
   readonly type = 'about:blank';
   readonly title = 'Unauthorized';
 }
+
+export class ForbiddenError extends AppError {
+  readonly status = 403;
+  readonly type = 'about:blank';
+  readonly title = 'Forbidden';
+}

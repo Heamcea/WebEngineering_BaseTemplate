@@ -3,17 +3,20 @@ import { HighlightText } from '../features/search/HighlightText';
 import type { BearState } from '../types';
 import type { ReactElement } from 'react';
 import { Comments } from '../features/comments/Comments';
+import type { AuthUser } from '../auth';
 
 const PLACEHOLDER_IMAGE = '/media/placeholder.jpg';
 
 interface BearDetailPageProps {
   bearState: BearState;
   searchTerm: string;
+  user: AuthUser | null;
 }
 
 export function BearDetailPage({
   bearState,
   searchTerm,
+  user,
 }: BearDetailPageProps): ReactElement {
   const { bearId } = useParams<{ bearId: string }>();
 
@@ -84,7 +87,7 @@ export function BearDetailPage({
           </strong>{' '}
           <HighlightText text={bear.range} query={searchTerm} />
         </p>
-        <Comments bearId={bear.id} searchTerm={searchTerm} />
+        <Comments bearId={bear.id} searchTerm={searchTerm} user={user} />
       </article>
     </main>
   );

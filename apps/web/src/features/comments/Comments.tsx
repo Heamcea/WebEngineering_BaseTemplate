@@ -7,11 +7,13 @@ import type { FormEvent, ReactElement } from 'react';
 import { getProblemDetail } from '../../problem';
 
 import { apiUrl } from '../../api';
+import type { AuthUser } from '../../auth';
 
 interface Comment {
   id: string;
   bearId: string;
   author: string;
+  authorId: string | null;
   text: string;
   createdAt: string;
 }
@@ -19,9 +21,14 @@ interface Comment {
 interface CommentsProps {
   bearId: string;
   searchTerm: string;
+  user: AuthUser | null;
 }
 
-export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
+export function Comments({
+  bearId,
+  searchTerm,
+  user,
+}: CommentsProps): ReactElement {
   const [showComments, setShowComments] = useState(false);
 
   const [name, setName] = useState('');
@@ -150,43 +157,49 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
 
       {showComments && (
         <div className="comment-wrapper">
-          <h2>
-            <HighlightText text="Add comment" query={searchTerm} />
-          </h2>
+          {user !== null ? (
+            <>
+              <h2>
+                <HighlightText text="Add comment" query={searchTerm} />
+              </h2>
 
-          <form className="comment-form" onSubmit={handleSubmit}>
-            <div className="flex-pair">
-              Your name:
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(event) => {
-                  setName(event.target.value);
-                }}
-                required
-              />
-            </div>
+              <form className="comment-form" onSubmit={handleSubmit}>
+                <div className="flex-pair">
+                  Your name:
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter your name"
+                    value={name}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                    }}
+                    required
+                  />
+                </div>
 
-            <div className="flex-pair">
-              Your comment:
-              <input
-                type="text"
-                name="comment"
-                placeholder="Enter your comment"
-                value={comment}
-                onChange={(event) => {
-                  setComment(event.target.value);
-                }}
-                required
-              />
-            </div>
+                <div className="flex-pair">
+                  Your comment:
+                  <input
+                    type="text"
+                    name="comment"
+                    placeholder="Enter your comment"
+                    value={comment}
+                    onChange={(event) => {
+                      setComment(event.target.value);
+                    }}
+                    required
+                  />
+                </div>
 
-            <div>
-              <input type="submit" value="Submit comment" />
-            </div>
-          </form>
+                <div>
+                  <input type="submit" value="Submit comment" />
+                </div>
+              </form>
+            </>
+          ) : (
+            <p>Please log in to write a comment.</p>
+          )}
 
           {error !== null && <p>{error}</p>}
 
@@ -208,14 +221,18 @@ export function Comments({ bearId, searchTerm }: CommentsProps): ReactElement {
                     <HighlightText text={item.text} query={searchTerm} />
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void handleDelete(item.id);
-                    }}
-                  >
-                    Delete
-                  </button>
+                  {user !== null &&
+                    (user.id === item.authorId ||
+                      user.role === 'moderator') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleDelete(item.id);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
                 </li>
               ))}
             </ul>

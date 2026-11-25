@@ -24,17 +24,44 @@ export class DrizzleCommentRepository implements CommentRepository {
         bearId: row.bearId,
         author: row.author,
         text: row.text,
+        authorId: row.authorId,
         createdAt: row.createdAt.toISOString(),
       })
     );
   }
 
-  async create(bearId: string, input: NewCommentData): Promise<CommentData> {
+  async findById(id: string): Promise<CommentData | undefined> {
+    const [row] = await db
+      .select()
+      .from(comments)
+      .where(eq(comments.id, id))
+      .limit(1);
+
+    if (row === undefined) {
+      return undefined;
+    }
+
+    return Comment.parse({
+      id: row.id,
+      bearId: row.bearId,
+      author: row.author,
+      authorId: row.authorId,
+      text: row.text,
+      createdAt: row.createdAt.toISOString(),
+    });
+  }
+
+  async create(
+    bearId: string,
+    input: NewCommentData,
+    authorId: string
+  ): Promise<CommentData> {
     const [row] = await db
       .insert(comments)
       .values({
         bearId,
         author: input.author,
+        authorId,
         text: input.text,
       })
       .returning();
@@ -43,6 +70,7 @@ export class DrizzleCommentRepository implements CommentRepository {
       id: row.id,
       bearId: row.bearId,
       author: row.author,
+      authorId: row.authorId,
       text: row.text,
       createdAt: row.createdAt.toISOString(),
     });

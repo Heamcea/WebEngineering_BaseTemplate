@@ -12,6 +12,45 @@ process.env.DATABASE_URL =
 
 let buildApp: typeof import('../src/app.js').buildApp;
 
+async function login(
+  app: ReturnType<typeof buildApp>
+): Promise<string> {
+  const credentials = {
+    email: 'test@example.com',
+    password: 'TestPassword123',
+  };
+
+  const registration = await app.inject({
+    method: 'POST',
+    url: '/api/auth/register',
+    payload: credentials,
+  });
+
+  expect(registration.statusCode).toBe(201);
+
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/auth/login',
+    payload: credentials,
+  });
+
+  expect(response.statusCode).toBe(200);
+
+  const setCookie = response.headers['set-cookie'];
+
+  const cookieHeader = Array.isArray(setCookie)
+    ? setCookie[0]
+    : setCookie;
+
+  const cookie = cookieHeader?.split(';')[0];
+
+  if (cookie === undefined || cookie === '') {
+    throw new Error('Session cookie missing');
+  }
+
+  return cookie;
+}
+
 beforeAll(async () => {
   ({ buildApp } = await import('../src/app.js'));
 });
@@ -36,15 +75,16 @@ describe('comments API', () => {
         sessions: new MemorySessionRepository(),
       },
     });
-
-    const createResponse = await app.inject({
-      method: 'POST',
-      url: '/api/bears/u-arctos/comments',
-      payload: {
-        author: 'Hamza',
-        text: 'Testkommentar',
-      },
-    });
+    const cookie = await login(app);
+      const createResponse = await app.inject({
+    method: 'POST',
+    url: '/api/bears/u-arctos/comments',
+    headers: { cookie },
+    payload: {
+      author: 'Hamza',
+      text: 'Testkommentar',
+    },
+  });
 
     expect(createResponse.statusCode).toBe(201);
 
@@ -63,9 +103,10 @@ describe('comments API', () => {
     expect(listResponse.json()).toHaveLength(1);
 
     const deleteResponse = await app.inject({
-      method: 'DELETE',
-      url: `/api/comments/${created.id}`,
-    });
+  method: 'DELETE',
+  url: `/api/comments/${created.id}`,
+  headers: { cookie },
+});
 
     expect(deleteResponse.statusCode).toBe(204);
 
@@ -88,17 +129,18 @@ describe('comments API', () => {
         sessions: new MemorySessionRepository(),
       },
     });
+const cookie = await login(app);
+const response = await app.inject({
+  method: 'POST',
+  url: '/api/bears/not-existing/comments',
+  headers: { cookie },
+  payload: {
+    author: 'Hamza',
+    text: 'Test',
+  },
+});
 
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/bears/not-existing/comments',
-      payload: {
-        author: 'Hamza',
-        text: 'Test',
-      },
-    });
-
-    expect(response.statusCode).toBe(404);
+expect(response.statusCode).toBe(404);
 
     await app.close();
   });

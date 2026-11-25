@@ -11,6 +11,7 @@ import {
   getCommentsForBear,
 } from '../services/comment-service.js';
 import { Problem } from '../schemas/problem.js';
+import { getSessionUser } from '../services/session-service.js';
 
 export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -52,6 +53,7 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           201: Comment,
           400: Problem,
+          401: Problem,
           404: Problem,
           415: Problem,
           502: Problem,
@@ -61,6 +63,11 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
+      const user = await getSessionUser(
+        app.repos.sessions,
+        app.repos.users,
+        request.cookies.sid
+      );
       const bear = await getBearById(app.repos.bears, request.params.id);
 
       if (bear === undefined) {
@@ -70,7 +77,8 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
       const comment = await createComment(
         app.repos.comments,
         request.params.id,
-        request.body
+        request.body,
+        user.id
       );
 
       return await reply
@@ -90,15 +98,23 @@ export const commentRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           204: z.null(),
           400: Problem,
+          401: Problem,
+          403: Problem,
           404: Problem,
           500: Problem,
         },
       },
     },
     async (request, reply) => {
+      const user = await getSessionUser(
+        app.repos.sessions,
+        app.repos.users,
+        request.cookies.sid
+      );
       const deleted = await deleteComment(
         app.repos.comments,
-        request.params.commentId
+        request.params.commentId,
+        user
       );
 
       if (!deleted) {

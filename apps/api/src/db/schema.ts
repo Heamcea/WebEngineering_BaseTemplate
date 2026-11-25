@@ -29,6 +29,9 @@ export const comments = pgTable(
     })
       .notNull()
       .defaultNow(),
+    authorId: uuid('author_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
   },
   (table) => [
     index('comments_bear_created_idx').on(

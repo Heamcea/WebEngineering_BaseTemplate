@@ -160,7 +160,11 @@ export function App(): ReactElement {
         <Route
           path="/bears/:bearId"
           element={
-            <BearDetailPage bearState={bearState} searchTerm={searchTerm} />
+            <BearDetailPage
+              bearState={bearState}
+              searchTerm={searchTerm}
+              user={user}
+            />
           }
         />
 

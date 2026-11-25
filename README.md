@@ -565,4 +565,27 @@ Sessions expire after eight hours.
 **Consequences:** Sessions can be invalidated immediately on logout.
 No JWT blocklist or refresh token mechanism is required.
 However, session validation requires database access and server-side state.
+
+### Task 3 – Authorisation for Comments
+
+- Added author_id to comments as a foreign key referencing users.
+- Creating comments requires an authenticated session.
+- The author ID is determined by the server, not by the client.
+- Only the comment owner or a moderator can delete a comment.
+- Authorisation is enforced centrally in the CommentService.
+- The database seed creates a moderator account.
+- The frontend hides comment creation and deletion controls
+  based on the user's authentication and permissions.
+- Existing comments without an author ID can only be deleted
+  by moderators.
+
+#### Authorization Test Matrix (curl)
+
+| User       | DELETE status |
+| ---------- | ------------- |
+| Anonymous  | 401           |
+| Author     | 204           |
+| Other user | 403           |
+| Moderator  | 204           |
+
 <p>© 2026 Leon Freudenthaler (Hochschule Campus Wien). All rights reversed.</p>
